@@ -1,9 +1,7 @@
 package edu.njust;
 
-import cn.hutool.json.JSONParser;
 import cn.hutool.json.JSONUtil;
-import cn.hutool.json.serialize.JSONWriter;
-import edu.njust.common.Grammar;
+import edu.njust.word.domain.Grammar;
 
 import java.io.IOException;
 

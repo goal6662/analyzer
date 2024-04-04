@@ -1,4 +1,4 @@
-package edu.njust.common;
+package edu.njust.word.common;
 
 public class Constant {
 

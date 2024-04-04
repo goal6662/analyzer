@@ -1,4 +1,4 @@
-package edu.njust.common;
+package edu.njust.word.domain;
 
 import lombok.Data;
 import lombok.Getter;
@@ -15,24 +15,20 @@ import java.util.*;
  * <A> -> a<B>
  * <B> -> b
  */
-@Data
+@Getter
 @ToString
 public class Grammar {
 
     /**
      * 终结符的集合
      */
-    private Set<String> terminator;
+    private final Set<String> terminator;
 
     /**
      * 规则的集合
+     * 起始符号：规则集合
      */
-    private Map<String, Set<Rule>> rules;
-
-    /**
-     * 文法起始符号
-     */
-    private String type;
+    private final Map<String, Set<Rule>> rules;
 
     public Grammar(String filePath) throws IOException {
         terminator = new HashSet<>();
@@ -81,52 +77,3 @@ public class Grammar {
     }
 }
 
-@Getter
-@ToString
-class Rule {
-
-    /**
-     * 规则左部
-     * 一定是一个非终结符
-     */
-    private final String left;
-
-    /**
-     * 规则右部
-     */
-    private final String right;
-
-    /**
-     * 该规则导出的下一个状态
-     */
-    private final String next;
-
-    /**
-     * 转移条件
-     */
-    private final String symbol;
-
-    public Rule(String rule) {
-        String[] res = splitRule(rule);
-
-        left = res[0].substring(1, res[0].length() - 1);
-        right = res[1];
-        if (res[1].length() == 1) {
-            next = null;
-            symbol = res[1];
-        } else {
-            int index= res[1].indexOf("<");
-            if (index != -1) {
-                symbol = res[1].substring(0, index);
-                next = res[1].substring(index + 1, res[1].length() - 1);
-            } else {
-                symbol = res[1];
-                next = null;
-            }
-        }
-    }
-
-    private String[] splitRule(String rule) {
-        return rule.split(" -> ");
-    }
-}
