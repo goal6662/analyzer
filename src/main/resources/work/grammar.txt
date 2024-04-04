@@ -1,0 +1,53 @@
+# 数字
+<number> -> 0
+<number> -> 1
+<number> -> 2
+<number> -> 3
+<number> -> 4
+<number> -> 5
+<number> -> 6
+<number> -> 7
+<number> -> 8
+<number> -> 9
+# 小写字母
+<lower> -> a
+<lower> -> b
+<lower> -> c
+<lower> -> d
+<lower> -> e
+<lower> -> f
+<lower> -> g
+<lower> -> h
+<lower> -> i
+<lower> -> j
+<lower> -> k
+<lower> -> l
+<lower> -> m
+<lower> -> n
+<lower> -> o
+<lower> -> p
+<lower> -> q
+<lower> -> r
+<lower> -> s
+<lower> -> t
+<lower> -> u
+<lower> -> v
+<lower> -> w
+<lower> -> x
+<lower> -> y
+<lower> -> z
+# 大写字母
+<upper> -> A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+<lower> -> a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
+# 关键字 for,while,if,else,class,extend,public,static
+<key_word> ->
+
+# 界符
+<delimiters> -> (
+<delimiters> -> )
+<delimiters> -> {
+<delimiters> -> }
+<delimiters> -> [
+<delimiters> -> ]
+<delimiters> -> ,
+<delimiters> -> ;
