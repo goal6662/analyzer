@@ -5,13 +5,10 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 文法规则
@@ -30,7 +27,7 @@ public class Grammar {
     /**
      * 规则的集合
      */
-    private Set<Rule> rules;
+    private Map<String, Set<Rule>> rules;
 
     /**
      * 文法起始符号
@@ -38,8 +35,8 @@ public class Grammar {
     private String type;
 
     public Grammar(String filePath) throws IOException {
-        terminator = new LinkedHashSet<>();
-        rules = new HashSet<>();
+        terminator = new HashSet<>();
+        rules = new HashMap<>();
 
         handleGrammar(filePath);
     }
@@ -49,20 +46,27 @@ public class Grammar {
         try (BufferedReader reader = loadFile(filePath)) {
 
             String rule;
+            Set<Rule> curRules = new LinkedHashSet<>();
             while ((rule = reader.readLine()) != null) {
                 // 跳过注释
-                if (rule.startsWith("#")) {
+                if (rule.startsWith("#") || rule.trim().isEmpty()) {
                     continue;
                 }
 
                 // 解析规则
                 Rule cur = new Rule(rule);
-                rules.add(cur);
-                terminator.add(cur.getSymbol());
-
                 if (cur.getLeft().length() > 1) {
-                    type = cur.getLeft();
+                    if (rules.containsKey(cur.getLeft())) {
+                        curRules = rules.get(cur.getLeft());
+                    } else {
+                        HashSet<Rule> temp = new LinkedHashSet<>();
+                        rules.put(cur.getLeft(), temp);
+                        curRules = temp;
+                    }
                 }
+
+                curRules.add(cur);
+                terminator.add(cur.getSymbol());
 
             }
         }
@@ -78,6 +82,7 @@ public class Grammar {
 }
 
 @Getter
+@ToString
 class Rule {
 
     /**
@@ -110,8 +115,14 @@ class Rule {
             next = null;
             symbol = res[1];
         } else {
-            symbol = res[1].substring(0, 1);
-            next = res[1].substring(res[1].indexOf('<', res[1].length() - 1));
+            int index= res[1].indexOf("<");
+            if (index != -1) {
+                symbol = res[1].substring(0, index);
+                next = res[1].substring(index + 1, res[1].length() - 1);
+            } else {
+                symbol = res[1];
+                next = null;
+            }
         }
     }
 
