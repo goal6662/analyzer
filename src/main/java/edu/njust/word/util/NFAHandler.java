@@ -62,15 +62,24 @@ public class NFAHandler {
         // 2. 获取右部
         NFAState to = nfa.getStateWithSign(rule.getNext());
         if (to == null || rule.getNext() == null) {
-            to = new NFAState(states.size());
-            // 添加至状态集合
-            nfa.addState(to);
-            // 关联状态
-            nfa.linkStateWithSign(to, rule.getNext());
-
-            // 终态
-            if (rule.getNext() == null) {
-                nfa.addAcceptState(to);
+            if (rule.getNext() != null) {
+                to = new NFAState(states.size());
+                // 添加至状态集合
+                nfa.addState(to);
+                // 关联状态
+                nfa.linkStateWithSign(to, rule.getNext());
+            } else {
+                String toKey = rule.getSymbol();
+                // 该终结符已被添加
+                to = nfa.getStateWithSign(toKey);
+                if (to == null) {
+                    to = new NFAState(states.size());
+                    // 添加至状态集合
+                    nfa.addState(to);
+                    // 关联状态
+                    nfa.linkStateWithSign(to, toKey);
+                    nfa.addAcceptState(to);
+                }
             }
         }
 
@@ -108,7 +117,7 @@ public class NFAHandler {
                 System.out.println();
             }
             if (!state.getEpsilonClosures().isEmpty()) {
-                System.out.print("  ε -> ");
+                System.out.print("  \"ε\" -> ");
                 for (NFAState nextState : state.getEpsilonClosures()) {
                     System.out.print(nextState.getStateNum() + " ");
                 }
