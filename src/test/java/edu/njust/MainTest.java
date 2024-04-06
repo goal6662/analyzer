@@ -1,7 +1,7 @@
 package edu.njust;
 
 import cn.hutool.json.JSONUtil;
-import edu.njust.word.domain.Grammar;
+import edu.njust.word.domain.grammar.Grammar;
 
 import java.io.IOException;
 

@@ -1,10 +1,10 @@
 package edu.njust.word.util;
 
 
-import edu.njust.word.domain.NFA;
-import edu.njust.word.domain.Grammar;
-import edu.njust.word.domain.NFAState;
-import edu.njust.word.domain.Rule;
+import edu.njust.word.domain.nfa.NFA;
+import edu.njust.word.domain.grammar.Grammar;
+import edu.njust.word.domain.nfa.NFAState;
+import edu.njust.word.domain.grammar.Rule;
 
 import java.util.HashMap;
 import java.util.Map;

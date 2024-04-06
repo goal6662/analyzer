@@ -1,6 +1,5 @@
-package edu.njust.word.domain;
+package edu.njust.word.domain.grammar;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 

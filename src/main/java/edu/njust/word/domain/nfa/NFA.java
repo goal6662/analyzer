@@ -1,4 +1,4 @@
-package edu.njust.word.domain;
+package edu.njust.word.domain.nfa;
 
 import lombok.Getter;
 
@@ -15,6 +15,11 @@ public class NFA {
     Set<NFAState> states;
 
     /**
+     * 转移字符的集合
+     */
+    private Set<String> symbols;
+
+    /**
      * 起始状态
      */
     NFAState startState;
@@ -28,6 +33,7 @@ public class NFA {
         states = new LinkedHashSet<>();
         stateMap = new HashMap<>();
         acceptStates = new HashSet<>();
+        symbols = new HashSet<>();
     }
 
     public void addState(NFAState state) {
@@ -53,6 +59,7 @@ public class NFA {
         if (!from.transitions.containsKey(symbol))
             from.transitions.put(symbol, new HashSet<>());
         from.transitions.get(symbol).add(to);
+        symbols.add(symbol);
     }
 
     public void addEpsilonTransition(NFAState from, NFAState to) {
