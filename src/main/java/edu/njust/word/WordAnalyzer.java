@@ -16,8 +16,11 @@ public class WordAnalyzer {
         Grammar grammar = new Grammar("word/gra.txt");
         Map<String, NFA> nfa = NFAHandler.getNFA(grammar);
 
+//        printNFA(nfa);
+
         Map<NFA, DFA> dfa = new HashMap<>();
         for (String key : nfa.keySet()) {
+            System.out.println(key);
             NFA nfaT = nfa.get(key);
             DFA dfaT = DFAHandler.nfaToNFA(nfaT);
             dfa.put(nfaT, dfaT);

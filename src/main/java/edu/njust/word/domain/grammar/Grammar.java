@@ -60,12 +60,53 @@ public class Grammar {
                     }
                 }
 
-                curRules.add(cur);
-                terminator.add(cur.getSymbol());
+                if (cur.getSymbol() != null && cur.getSymbol().startsWith("\\\\")) {
+                    List<Rule> ruleList = handlerMatcher(cur);
 
+                    for (Rule temp : ruleList) {
+                        curRules.add(temp);
+                        terminator.add(temp.getSymbol());
+                    }
+
+                } else {
+                    curRules.add(cur);
+                    terminator.add(cur.getSymbol());
+                }
+
+//                curRules.add(cur);
+//                terminator.add(cur.getSymbol());
             }
         }
 
+    }
+
+    private List<Rule> handlerMatcher(Rule rule) {
+        List<Rule> ruleList = new ArrayList<>();
+
+        switch (rule.getSymbol()) {
+            case "\\\\s":
+                for (char i = 'a'; i <= 'z'; i++) {
+                    Rule temp = new Rule(rule.getLeft(), String.valueOf(i), rule.getNext());
+                    ruleList.add(temp);
+                }
+                break;
+            case "\\\\S":
+                for (char i = 'A'; i <= 'Z'; i++) {
+                    Rule temp = new Rule(rule.getLeft(), String.valueOf(i), rule.getNext());
+                    ruleList.add(temp);
+                }
+                break;
+            case "\\\\d":
+                for (int i = 0; i <= 9; i++) {
+                    Rule temp = new Rule(rule.getLeft(), String.valueOf(i), rule.getNext());
+                    ruleList.add(temp);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return ruleList;
     }
 
     private BufferedReader loadFile(String filePath) throws IOException {
