@@ -4,6 +4,7 @@ import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.dfa.DFAState;
 import edu.njust.word.domain.nfa.NFA;
 import edu.njust.word.domain.nfa.NFAState;
+import lombok.Data;
 
 import java.util.HashSet;
 import java.util.LinkedList;

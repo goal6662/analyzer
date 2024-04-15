@@ -35,12 +35,12 @@ public class WordAnalyzer {
 
         Matcher matcher = new Matcher("word/lex.txt");
 
-        List<TokenInfo> match =
-                matcher.match(dfa);
+        for (String type : dfa.keySet()) {
+            List<TokenInfo> infos = matcher.match(type, dfa.get(type));
+            matcher.writeToFile("word/out10.txt", infos);
+        }
 
-        matcher.writeToFile("word/out10.txt", match);
 
-        System.out.println(match);
     }
 
     public static void printNFA(Map<String, NFA> nfa) {
