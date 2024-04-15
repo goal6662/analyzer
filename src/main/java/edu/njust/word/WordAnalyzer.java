@@ -36,7 +36,7 @@ public class WordAnalyzer {
         Matcher matcher = new Matcher("word/lex.txt");
 
         List<TokenInfo> match =
-                matcher.match(dfa.get("constant"));
+                matcher.match(dfa);
 
         matcher.writeToFile("word/out10.txt", match);
 
