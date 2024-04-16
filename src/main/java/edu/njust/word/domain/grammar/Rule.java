@@ -40,7 +40,7 @@ public class Rule {
             next = null;
             symbol = res[1];
         } else {
-            int index = res[1].indexOf("<");
+            int index = res[1].lastIndexOf("<");
             if (index != -1) {
                 String s = res[1].substring(0, index);
                 symbol = s.isEmpty() ? null : s;

@@ -1,5 +1,6 @@
 package edu.njust.word;
 
+import edu.njust.word.common.TokenType;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.grammar.Grammar;
 import edu.njust.word.domain.nfa.NFA;
@@ -28,19 +29,23 @@ public class WordAnalyzer {
             DFA dfaT = DFAHandler.nfaToNFA(nfaT);
             dfa.put(key, dfaT);
 
-            DFAHandler.printDFA(dfaT);
+            if(key.equals(TokenType.IDENTIFIER)) {
+//                NFAHandler.printNFA(nfaT);
+                DFAHandler.printDFA(dfaT);
+            }
 
             System.out.println("\n -------------------------------------- \n");
         }
 
+        Map<String, List<TokenInfo>> info = new HashMap<>();
         Matcher matcher = new Matcher("word/lex.txt");
 
         for (String type : dfa.keySet()) {
             List<TokenInfo> infos = matcher.match(type, dfa.get(type));
-            matcher.writeToFile("word/out10.txt", infos);
+            info.put(type, infos);
         }
 
-
+        matcher.writeToFile("word/out10.txt", info);
     }
 
     public static void printNFA(Map<String, NFA> nfa) {

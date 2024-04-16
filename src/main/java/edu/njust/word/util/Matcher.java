@@ -1,12 +1,8 @@
 package edu.njust.word.util;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-import edu.njust.word.common.Constant;
 import edu.njust.word.common.TokenType;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.dfa.DFAState;
-import edu.njust.word.domain.nfa.NFA;
-import edu.njust.word.domain.nfa.NFAState;
 import edu.njust.word.domain.token.TokenInfo;
 
 import java.io.*;
@@ -52,20 +48,61 @@ public class Matcher {
                     curState = dfa.getStartState();
                 }
 
-                if (!dfa.getTransitions().get(curState).containsKey(symbol)) {
+                DFAState nextState = dfa.getTransitions().get(curState).get(symbol);
+                if (nextState == null) {
 
                     // 当前字符未能匹配
                     int space = content.indexOf(' ', i);
                     // 存在下一个匹配项
                     if (space != -1) {
                         i = space;
-                        symbol = String.valueOf(content.charAt(i + 1));
                     } else {
                         break;
                     }
-
-                    if (builder.length() > 0) {
+                    if (builder.length() > 0 && curState.isAccept()) {
                         infos.add(new TokenInfo(len, type, builder.toString()));
+                        builder = new StringBuilder();
+                    }
+
+                } else {
+                    builder.append(symbol);
+                }
+
+                curState = nextState;
+
+            }
+
+            if (curState != null && curState.isAccept() && builder.length() > 0) {
+                infos.add(new TokenInfo(len, type, builder.toString()));
+            }
+            ++len;
+        }
+
+        return infos;
+    }
+
+    /**
+     * @param dfa
+     * @return
+     */
+    public List<TokenInfo> operatorMatch(DFA dfa) {
+        List<TokenInfo> infos = new ArrayList<>();
+        // 1. 记录行号
+        int len = 1;
+
+        for (String content : fileData) {
+            DFAState curState = dfa.getStartState();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < content.length(); i++) {
+                // 1. 获取转移字符
+                String symbol = String.valueOf(content.charAt(i));
+                if (curState == null) {
+                    curState = dfa.getStartState();
+                }
+
+                if (!dfa.getTransitions().get(curState).containsKey(symbol)) {
+                    if (builder.length() > 0) {
+                        infos.add(new TokenInfo(len, TokenType.OPERATOR, builder.toString()));
                         builder = new StringBuilder();
                     }
                 } else {
@@ -77,7 +114,7 @@ public class Matcher {
             }
 
             if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, type, builder.toString()));
+                infos.add(new TokenInfo(len, TokenType.OPERATOR, builder.toString()));
             }
             ++len;
         }
@@ -103,6 +140,9 @@ public class Matcher {
             case TokenType.CONSTANT:
                 infos.addAll(constantMatch(dfa));
                 break;
+            case TokenType.OPERATOR:
+                infos.addAll(operatorMatch(dfa));
+                break;
             default:
                 infos.addAll(defaultMatch(type, dfa));
                 break;
@@ -112,7 +152,6 @@ public class Matcher {
 
     /**
      * 匹配分隔符
-     *
      * @param dfa
      * @return
      */
@@ -178,6 +217,7 @@ public class Matcher {
 
                 if (curState == null) {
                     curState = dfa.getStartState();
+                    builder = new StringBuilder();
                 }
 
                 DFAState nextState = dfa.getTransitions().get(curState).get(symbol);
@@ -227,11 +267,9 @@ public class Matcher {
                     // 存在下一个匹配项
                     if (space != -1) {
                         i = space;
-                        symbol = String.valueOf(content.charAt(i + 1));
                     } else {
                         break;
                     }
-
 
                     if (builder.length() > 0) {
                         if (content.charAt(temp + 1) == ' ') {
@@ -243,10 +281,9 @@ public class Matcher {
                     builder.append(symbol);
                 }
 
-                curState = dfa.getTransitions().get(curState).get(symbol);
+                curState = nextState;
 
             }
-
             if (curState != null && curState.isAccept() && builder.length() > 0) {
                 infos.add(new TokenInfo(len, TokenType.CONSTANT, builder.toString()));
             }
@@ -268,11 +305,32 @@ public class Matcher {
         URL url = this.getClass().getClassLoader().getResource(outputFile);
 
         assert url != null;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath(), true));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath()));
 
         for (TokenInfo tokenInfo : infos) {
             writer.write(tokenInfo.getInfo());
             writer.newLine();
+        }
+        writer.flush();
+        writer.close();
+
+    }
+
+    public void writeToFile(String outputFile, Map<String, List<TokenInfo>> infos) throws IOException {
+        URL url = this.getClass().getClassLoader().getResource(outputFile);
+
+        assert url != null;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath()));
+
+        for (String type : infos.keySet()) {
+            infos.get(type).forEach(info -> {
+                try {
+                    writer.write(info.getInfo());
+                    writer.newLine();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         writer.flush();
         writer.close();

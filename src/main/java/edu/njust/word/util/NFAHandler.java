@@ -16,6 +16,7 @@ import java.util.Set;
 public class NFAHandler {
     /**
      * 根据文法生成所有类型对应的 NFA
+     *
      * @param grammar 文法规则
      * @return
      */
