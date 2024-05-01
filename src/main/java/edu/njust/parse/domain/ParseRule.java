@@ -35,7 +35,6 @@ public class ParseRule {
             ruleList.add(rule);
         }
 
-        System.out.println(generateVn().size());
     }
 
     /**
@@ -61,8 +60,9 @@ public class ParseRule {
         return vts;
     }
 
-    public Set<Vn> generateVn() {
+    public Set<Vn> generateVn(Map<String, Set<String>> types) {
         Set<Vn> vns = new HashSet<>();
+        Set<String> vts = generateVt();
 
         Map<String, Vn> map = new HashMap<>();
         for (String rule : ruleList) {

@@ -7,9 +7,7 @@ import edu.njust.word.domain.token.TokenInfo;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * DFA --> Token
@@ -135,7 +133,8 @@ public class Matcher {
                 infos.addAll(delimitersMatch(dfa));
                 break;
             case TokenType.KEY_WORD:
-                infos.addAll(keywordMatch(dfa));
+            case TokenType.TYPE:
+                infos.addAll(keywordMatch(dfa, type));
                 break;
             case TokenType.CONSTANT:
                 infos.addAll(constantMatch(dfa));
@@ -204,7 +203,7 @@ public class Matcher {
      * @param dfa
      * @return
      */
-    private List<TokenInfo> keywordMatch(DFA dfa) {
+    private List<TokenInfo> keywordMatch(DFA dfa, String type) {
         List<TokenInfo> infos = new ArrayList<>();
         // 1. 记录行号
         int len = 1;
@@ -225,7 +224,7 @@ public class Matcher {
                 if (nextState == null) {
                     // 存放结果
                     if (builder.length() > 0 && curState.isAccept()) {
-                        infos.add(new TokenInfo(len, TokenType.KEY_WORD, builder.toString()));
+                        infos.add(new TokenInfo(len, type, builder.toString()));
                         builder = new StringBuilder();
                     }
                 } else {
@@ -236,7 +235,7 @@ public class Matcher {
             }
             // 判断最后一个字符的情况
             if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, TokenType.DELIMITER, builder.toString()));
+                infos.add(new TokenInfo(len, type, builder.toString()));
             }
             ++len;
         }
@@ -332,6 +331,17 @@ public class Matcher {
                 }
             });
         }
+
+        writer.write("-----------");
+        writer.newLine();
+        for (String type : infos.keySet()) {
+            // 对应符号集合
+            Set<String> sets = new HashSet<>();
+            infos.get(type).forEach(info -> sets.add(info.getContent()));
+            writer.write(type + ": " + sets);
+            writer.newLine();
+        }
+
         writer.flush();
         writer.close();
 

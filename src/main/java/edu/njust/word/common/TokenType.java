@@ -28,4 +28,9 @@ public class TokenType {
      */
     public static final String OPERATOR = "operator";
 
+    /**
+     * 数据类型
+     */
+    public static final String TYPE = "type";
+
 }
