@@ -1,0 +1,33 @@
+package edu.njust.parse.domain;
+
+import java.util.Set;
+
+public class Project {
+
+    /**
+     * 文法开始符号
+     */
+    public static final String START = "start";
+
+    /**
+     * 非终结符的集合
+     */
+    private final Set<Vn> vns;
+
+    /**
+     * 终结符的集合
+     */
+    private final Set<String> vts;
+
+
+    /**
+     * 根据规则构造工程
+     * @param rule
+     */
+    public Project(ParseRule rule) {
+        vns = rule.generateVn();
+        vts = rule.generateVt();
+    }
+
+
+}
