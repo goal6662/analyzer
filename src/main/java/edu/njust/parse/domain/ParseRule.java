@@ -20,11 +20,12 @@ public class ParseRule {
 
     private final Map<String, Set<String>> types;
 
+    private final String start;
     /**
      * 解析文法规则
      * @param file 规则文件
      */
-    public ParseRule(String file, String outFile) throws IOException {
+    public ParseRule(String file, String outFile, String start) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(file);
 
         assert url != null;
@@ -38,7 +39,8 @@ public class ParseRule {
             }
             ruleList.add(rule);
         }
-        types = readTypeInfo(outFile);
+        this.types = readTypeInfo(outFile);
+        this.start = start;
     }
 
     private Map<String, Set<String>> readTypeInfo(String outFile) throws IOException {
@@ -67,8 +69,8 @@ public class ParseRule {
      * 终结符的集合
      */
     public Set<String> generateVt() {
+        // TODO: 2024/5/1 存在BUG：引用类型的终结符还未加入
         Set<String> vts = new HashSet<>();
-
         for (String rule : ruleList) {
             char[] right = rule.split(" -> ")[1].toCharArray();
             for (int i = 0; i < right.length;) {
@@ -107,10 +109,122 @@ public class ParseRule {
         }
 
         generateFirst(vns, map);
-
+        generateFollow(vns, map);
         return vns;
     }
 
+    /**
+     * 生成 终结符的 Follow 集
+     * @param vns 终结符集合
+     * @param map 终结符 symbol 的映射关系
+     */
+    private void generateFollow(Set<Vn> vns, Map<String, Vn> map) {
+        // 起始字符
+        map.get(start).getFollow().add("#");
+
+        for (String rule : ruleList) {
+            generateNextFollow(rule, map);
+        }
+
+        // 获取Follow集
+        boolean hasChange;
+        do {
+            hasChange = false;
+            for (Vn vn : vns) {
+                // 获取终结符集合
+                int oldLen = vn.getFollow().size();
+
+                Set<String> need = new HashSet<>();
+                for (String follow : vn.getFollow()) {
+                    if (follow.length() > 1) {
+                        need.addAll(map.get(follow).getFollow());
+                    }
+
+                }
+                vn.getFollow().addAll(need);
+                if (oldLen != vn.getFollow().size()) {
+                    hasChange = true;
+                }
+            }
+        } while (hasChange);
+
+        // 移除占位符
+        for (Vn vn : vns) {
+            vn.getFollow().removeIf(type -> type.length() > 1);
+        }
+
+    }
+    private void generateNextFollow(String rule, Map<String, Vn> map) {
+        String[] split = rule.split(" -> ");
+        String left = split[0].substring(1, split[0].length() - 1);
+        String right = split[1];
+
+        if (right.length() <= 2) {
+            return;
+        }
+
+        List<String> symbols = new ArrayList<>();
+        // 获取右部所有非终结符
+        for (int i = right.indexOf("<"); i < right.length() && i != -1; ++i) {
+
+            if (right.charAt(i) == '<' && right.indexOf(">", i) != -1) {
+                int index = right.indexOf(">", i);
+                symbols.add(right.substring(i, index + 1));
+                i = index;
+            } else {
+
+                symbols.add(String.valueOf(right.charAt(i)));
+
+                int index = right.indexOf('<', i + 1);
+                if (index == -1) {
+                    break;
+                }
+                i = index - 1;
+            }
+
+        }
+
+        for (int i = symbols.size() - 1; i >= 0; i--) {
+
+            // 这是一个非终结符
+            if (symbols.get(i).startsWith("<") && symbols.get(i).endsWith(">")) {
+                String sign = symbols.get(i).substring(1, symbols.get(i).length() - 1);
+
+                Vn cur = map.get(sign);
+
+                boolean canEmpty = true;
+                for (int j = i + 1; j < symbols.size(); j++) {
+                    String sym = symbols.get(j);
+                    if (sym.length() <= 1) {
+                        cur.getFollow().add(sym);
+                        canEmpty = false;
+                        break;
+                    } else {
+                        // 去掉标识符
+                        sym = sym.substring(1, symbols.get(j).length() - 1);
+                        Vn next = map.get(sym);
+                        // 一定会添加First集
+                        cur.getFollow().addAll(next.getFirst());
+                        // 无法推出空串：结束
+                        if (!next.getFirst().contains(Constant.EPSILON)) {
+                            canEmpty = false;
+                            break;
+                        } else {
+                            // 可以推出空串：去除空字符，继续
+                            cur.getFollow().remove(Constant.EPSILON);
+                        }
+                    }
+                }
+
+                // 可以推出空串
+                if (canEmpty) {
+                    map.get(sign).getFollow().add(left);
+                }
+
+            }
+        }
+
+    }
 
     /**
      * 获取 First 集

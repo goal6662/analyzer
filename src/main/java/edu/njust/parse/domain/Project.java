@@ -25,7 +25,7 @@ public class Project {
      * 根据规则构造工程
      */
     public Project(String ruleFile, String wordOutFile) throws IOException {
-        ParseRule rule = new ParseRule(ruleFile, wordOutFile);
+        ParseRule rule = new ParseRule(ruleFile, wordOutFile, START);
         vns = rule.generateVn();
         vts = rule.generateVt();
     }
