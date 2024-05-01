@@ -1,6 +1,6 @@
 package edu.njust.word;
 
-import edu.njust.word.common.TokenType;
+import edu.njust.common.TokenType;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.grammar.Grammar;
 import edu.njust.word.domain.nfa.NFA;

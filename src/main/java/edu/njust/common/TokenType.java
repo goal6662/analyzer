@@ -1,4 +1,4 @@
-package edu.njust.word.common;
+package edu.njust.common;
 
 public class TokenType {
 

@@ -1,6 +1,6 @@
 package edu.njust.word.util;
 
-import edu.njust.word.common.TokenType;
+import edu.njust.common.TokenType;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.dfa.DFAState;
 import edu.njust.word.domain.token.TokenInfo;
