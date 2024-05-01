@@ -1,14 +1,12 @@
 package edu.njust.parse.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Getter
+@ToString
 @EqualsAndHashCode
 @AllArgsConstructor
 public class Vn {
@@ -18,7 +16,7 @@ public class Vn {
      */
     private String symbol;
 
-    private boolean isEnd = false;
+//    private boolean isEnd = false;
 
     /**
      * First 集
@@ -33,11 +31,6 @@ public class Vn {
 
     public Vn(String symbol) {
         this.symbol = symbol;
-    }
-
-    public Vn(String symbol, boolean isEnd) {
-        this.symbol = symbol;
-        this.isEnd = isEnd;
     }
 
 }

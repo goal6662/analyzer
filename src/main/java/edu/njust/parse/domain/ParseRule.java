@@ -21,6 +21,17 @@ public class ParseRule {
     private final Map<String, Set<String>> types;
 
     private final String start;
+
+    /**
+     * 非终结符的集合
+     */
+    private final Set<Vn> vns;
+
+    /**
+     * 终结符的集合
+     */
+    private final Set<String> vts;
+
     /**
      * 解析文法规则
      * @param file 规则文件
@@ -41,6 +52,14 @@ public class ParseRule {
         }
         this.types = readTypeInfo(outFile);
         this.start = start;
+
+        this.vns = generateVn();
+        this.vts = generateVt();
+
+        // 移除 types 的无用符号
+        for (Vn vn : vns) {
+            types.remove(vn.getSymbol());
+        }
     }
 
     private Map<String, Set<String>> readTypeInfo(String outFile) throws IOException {
@@ -68,7 +87,7 @@ public class ParseRule {
     /**
      * 终结符的集合
      */
-    public Set<String> generateVt() {
+    private Set<String> generateVt() {
         // TODO: 2024/5/1 存在BUG：引用类型的终结符还未加入
         Set<String> vts = new HashSet<>();
         for (String rule : ruleList) {
@@ -85,6 +104,15 @@ public class ParseRule {
             }
         }
 
+        types.values().forEach((set) -> {
+            for (String s : set) {
+                for (int i = 0; i < s.length(); i++) {
+                    vts.add(String.valueOf(s.charAt(i)));
+                }
+            }
+        });
+
+
         return vts;
     }
 
@@ -92,7 +120,7 @@ public class ParseRule {
      * 生成 非终结符集合
      * @return
      */
-    public Set<Vn> generateVn() {
+    private Set<Vn> generateVn() {
         Map<String, Vn> map = getAllVn();
         Set<Vn> vns = new HashSet<>(map.values());
 
@@ -294,25 +322,31 @@ public class ParseRule {
 
             // 左部一定是非终结符
             String left = split[0];
+            String right = split[1];
             String symbol = split[0].substring(1, left.length() - 1);
 
-            Vn vn = new Vn(symbol);
-            if (split[1].equals(Constant.EPSILON)) {
-                vn = new Vn(symbol, true);
-            }
+            Vn vn = map.getOrDefault(symbol, new Vn(symbol));
             map.put(symbol, vn);
+
+            for (int i = 0; i < right.length(); ++i) {
+                if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
+                    int index = right.indexOf('>', i);
+                    symbol = right.substring(i + 1, index);
+                    // 终结符集合
+                    if (types.containsKey(symbol)) {
+                        Vn temp = map.getOrDefault(symbol, new Vn(symbol));
+
+                        List<String> list = types.get(symbol).stream().map((val) -> val.substring(0, 1))
+                                .collect(Collectors.toList());
+
+                        temp.getFirst().addAll(list);
+                        map.put(symbol, temp);
+                    }
+                    i = index;
+                }
+            }
         }
 
-        // 固有类型
-        for (String type : types.keySet()) {
-            Vn vn = new Vn(type);
-
-            List<String> list = types.get(type).stream().map((val) -> val.substring(0, 1))
-                    .collect(Collectors.toList());
-
-            vn.getFirst().addAll(list);
-            map.put(type, vn);
-        }
 
         return map;
     }

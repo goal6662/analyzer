@@ -1,8 +1,11 @@
 package edu.njust.parse.domain;
 
+import lombok.ToString;
+
 import java.io.IOException;
 import java.util.Set;
 
+@ToString
 public class Project {
 
     /**
@@ -20,14 +23,18 @@ public class Project {
      */
     private final Set<String> vts;
 
+    private final PredictTable table;
 
     /**
      * 根据规则构造工程
      */
     public Project(String ruleFile, String wordOutFile) throws IOException {
         ParseRule rule = new ParseRule(ruleFile, wordOutFile, START);
-        vns = rule.generateVn();
-        vts = rule.generateVt();
+        vns = rule.getVns();
+        vts = rule.getVts();
+        table = new PredictTable(rule);
     }
+
+
 
 }
