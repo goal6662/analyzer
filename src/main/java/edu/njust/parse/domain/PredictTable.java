@@ -67,8 +67,7 @@ public class PredictTable {
 
         for (String sign : rule.getRightList()) {
             if (sign.startsWith("<") && sign.endsWith(">")) {
-                String symbol = rule.removeSign(sign);
-                Set<String> first = vnMap.get(symbol).getFirst();
+                Set<String> first = vnMap.get(sign).getFirst();
                 set.addAll(first);
                 // 不能推出空
                 if (!first.contains(Constant.EPSILON)) {

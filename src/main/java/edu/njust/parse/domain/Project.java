@@ -13,7 +13,7 @@ public class Project {
     /**
      * 文法开始符号
      */
-    public static final String START = "start";
+    public static final String START = "<start>";
 
     /**
      * 非终结符的集合
@@ -36,7 +36,4 @@ public class Project {
         vts = rule.getVts();
         table = new PredictTable(rule);
     }
-
-
-
 }

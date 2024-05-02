@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 文法规则
@@ -79,7 +78,7 @@ public class ParseRule {
             if (rule.startsWith("----")) {
                 flag = true;
             } else if (flag) {
-                String type = rule.substring(0, rule.indexOf(':'));
+                String type = "<" + rule.substring(0, rule.indexOf(':')) + ">";
                 String[] infos = rule.substring(rule.indexOf('[') + 1, rule.length() - 1).split(", ");
                 Set<String> set = new HashSet<>(Arrays.asList(infos));
                 types.put(type, set);
@@ -92,34 +91,27 @@ public class ParseRule {
      * 终结符的集合
      */
     private Set<String> generateVt() {
-        // TODO: 2024/5/1 存在BUG：引用类型的终结符还未加入
         Set<String> vts = new HashSet<>();
-//        types.values().forEach(vts::addAll);
+        types.values().forEach(vts::addAll);
         for (Rule rule : rules) {
             String right = rule.getRight();
             for (int i = 0; i < right.length(); i++) {
                 if (right.charAt(i) == '<' && right.indexOf('>', i + 1) != -1) {
                     i = right.indexOf('>', i);
                 } else {
-                    vts.add(String.valueOf(right.charAt(i)));
+                    String sign;
                     int index = right.indexOf('<', i + 1);
                     if (index == -1) {
+                        vts.add(right.substring(i));
                         break;
+                    } else {
+                        sign = right.substring(i, index);
+                        i = index - 1;
                     }
-                    i = index - 1;
+                    vts.add(sign);
                 }
             }
         }
-
-        types.values().forEach((set) -> {
-            for (String s : set) {
-                for (int i = 0; i < s.length(); i++) {
-                    vts.add(String.valueOf(s.charAt(i)));
-                }
-            }
-        });
-
-
         return vts;
     }
 
@@ -131,16 +123,13 @@ public class ParseRule {
         Map<String, Vn> map = getAllVn();
         Set<Vn> vns = new HashSet<>(map.values());
 
-        for (String rule : ruleList) {
-            String[] split = rule.split(" -> ");
-
+        for (Rule rule : rules) {
             // 左部一定是非终结符
-            String left = split[0];
-            String symbol = split[0].substring(1, left.length() - 1);
+            String left = rule.getLeft();
 
             // 获取已有值
-            Vn vn = map.get(symbol);
-            vn.getFirst().addAll(generateNextFirst(split[1], types.keySet()));
+            Vn vn = map.get(left);
+            vn.getFirst().addAll(generateNextFirst(rule, types.keySet()));
         }
 
         generateFirst(vns, map);
@@ -157,7 +146,7 @@ public class ParseRule {
         // 起始字符
         map.get(start).getFollow().add("#");
 
-        for (String rule : ruleList) {
+        for (Rule rule : rules) {
             generateNextFollow(rule, map);
         }
 
@@ -171,7 +160,7 @@ public class ParseRule {
 
                 Set<String> need = new HashSet<>();
                 for (String follow : vn.getFollow()) {
-                    if (follow.length() > 1) {
+                    if (Rule.isVn(follow)) {
                         need.addAll(map.get(follow).getFollow());
                     }
 
@@ -185,58 +174,53 @@ public class ParseRule {
 
         // 移除占位符
         for (Vn vn : vns) {
-            vn.getFollow().removeIf(type -> type.length() > 1);
+            vn.getFollow().removeIf(Rule::isVn);
         }
 
     }
-    private void generateNextFollow(String rule, Map<String, Vn> map) {
-        String[] split = rule.split(" -> ");
-        String left = split[0].substring(1, split[0].length() - 1);
-        String right = split[1];
+    private void generateNextFollow(Rule rule, Map<String, Vn> map) {
+        String left = rule.getLeft();
+        String right = rule.getRight();
 
-        if (right.length() <= 2) {
+        if (Rule.isVt(right)) {
             return;
         }
 
-        List<String> symbols = new ArrayList<>();
-        // 获取右部所有非终结符
-        for (int i = right.indexOf("<"); i < right.length() && i != -1; ++i) {
-
-            if (right.charAt(i) == '<' && right.indexOf(">", i) != -1) {
-                int index = right.indexOf(">", i);
-                symbols.add(right.substring(i, index + 1));
-                i = index;
-            } else {
-
-                symbols.add(String.valueOf(right.charAt(i)));
-
-                int index = right.indexOf('<', i + 1);
-                if (index == -1) {
-                    break;
-                }
-                i = index - 1;
-            }
-
-        }
+        List<String> symbols = rule.getRightList();
+//        // 获取右部所有非终结符
+//        for (int i = right.indexOf("<"); i < right.length() && i != -1; ++i) {
+//
+//            if (right.charAt(i) == '<' && right.indexOf(">", i) != -1) {
+//                int index = right.indexOf(">", i);
+//                symbols.add(right.substring(i, index + 1));
+//                i = index;
+//            } else {
+//
+//                symbols.add(String.valueOf(right.charAt(i)));
+//
+//                int index = right.indexOf('<', i + 1);
+//                if (index == -1) {
+//                    break;
+//                }
+//                i = index - 1;
+//            }
+//
+//        }
 
         for (int i = symbols.size() - 1; i >= 0; i--) {
 
             // 这是一个非终结符
-            if (symbols.get(i).startsWith("<") && symbols.get(i).endsWith(">")) {
-                String sign = symbols.get(i).substring(1, symbols.get(i).length() - 1);
+            if (Rule.isVn(symbols.get(i))) {
+//                String sign = Rule.removeSign(symbols.get(i));
+                String sign = symbols.get(i);
 
                 Vn cur = map.get(sign);
-
                 boolean canEmpty = true;
                 for (int j = i + 1; j < symbols.size(); j++) {
                     String sym = symbols.get(j);
-                    if (sym.length() <= 1) {
-                        cur.getFollow().add(sym);
-                        canEmpty = false;
-                        break;
-                    } else {
+                    if (Rule.isVn(sym)) {
                         // 去掉标识符
-                        sym = sym.substring(1, symbols.get(j).length() - 1);
+//                        sym = Rule.removeSign(sym);
                         Vn next = map.get(sym);
                         // 一定会添加First集
                         cur.getFollow().addAll(next.getFirst());
@@ -248,6 +232,10 @@ public class ParseRule {
                             // 可以推出空串：去除空字符，继续
                             cur.getFollow().remove(Constant.EPSILON);
                         }
+                    } else {
+                        cur.getFollow().add(sym);
+                        canEmpty = false;
+                        break;
                     }
                 }
 
@@ -278,11 +266,13 @@ public class ParseRule {
 
                     Set<String> need = new HashSet<>();
                     for (String first : vn.getFirst()) {
-                        if (first.length() > 1) {
+                        // 非终结符
+                        if (!Rule.isVt(first)) {
                             need.addAll(map.get(first).getFirst());
                         }
 
                     }
+                    // 判断大小是否有变化
                     vn.getFirst().addAll(need);
                     if (oldLen != vn.getFirst().size()) {
                         hasChange = true;
@@ -298,23 +288,38 @@ public class ParseRule {
             }
         }
     }
-    private Set<String> generateNextFirst(String right, Set<String> types) {
+    private Set<String> generateNextFirst(Rule rule, Set<String> types) {
         Set<String> set = new HashSet<>();
-        for (int i = 0; i < right.length();) {
-            if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
-                int index = right.indexOf('>', i);
-                String symbol = right.substring(i + 1, index);
-                set.add(symbol);
-                // 终结符集合
-                if (types.contains(symbol)) {
-                    break;
-                }
-                i = index + 1;
-            } else {
-                set.add(String.valueOf(right.charAt(i)));
+        List<String> rightList = rule.getRightList();
+
+        for (String str : rightList) {
+            set.add(str);
+            // 第一个非终结符
+            if (Rule.isVt(str) || types.contains(Rule.removeSign(str))) {
                 break;
             }
         }
+
+//        for (int i = 0; i < right.length();) {
+//            if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
+//                int index = right.indexOf('>', i);
+//                String symbol = right.substring(i + 1, index);
+//                set.add(symbol);
+//                // 终结符集合
+//                if (types.contains(symbol)) {
+//                    break;
+//                }
+//                i = index + 1;
+//            } else {
+//                int index = right.indexOf("<");
+//                if (index == -1) {
+//                    set.add(right.substring(i));
+//                } else {
+//                    set.add(right.substring(i, index));
+//                }
+//                break;
+//            }
+//        }
         return set;
     }
 
@@ -332,20 +337,13 @@ public class ParseRule {
             map.put(left, vn);
 
             for (String sign : rule.getRightList()) {
-                if (sign.length() > 1) {
-                    String symbol = rule.removeSign(sign);
-
+                if (!Rule.isVt(sign)) {
                     // 加入引用符号
-                    if (types.containsKey(symbol)) {
-                        Vn temp = map.getOrDefault(symbol, new Vn(symbol));
-
-                        List<String> list = types.get(symbol).stream().map((val) -> val.substring(0, 1))
-                                .collect(Collectors.toList());
-
-                        temp.getFirst().addAll(list);
-                        map.put(symbol, temp);
+                    if (types.containsKey(sign)) {
+                        Vn temp = map.getOrDefault(sign, new Vn(sign));
+                        temp.getFirst().addAll(types.get(sign));
+                        map.put(sign, temp);
                     }
-
                 }
             }
         }
@@ -361,13 +359,18 @@ public class ParseRule {
 class Rule {
     private final String left;
     private final String right;
+
+    /**
+     * 保留了<>
+     */
     private final List<String> rightList;
 
     public Rule(String rule) {
         String[] split = rule.split(" -> ");
 
         // 左部可以直接去掉尖括号
-        this.left = removeSign(split[0]);
+//        this.left = removeSign(split[0]);
+        this.left = split[0];
         this.right = split[1];
         this.rightList = generateRightSet();
     }
@@ -384,11 +387,12 @@ class Rule {
                 list.add(symbol);
                 i = index;
             } else {
-                list.add(String.valueOf(right.charAt(i)));
-
                 int index = right.indexOf('<', i + 1);
                 if (index == -1) {
+                    list.add(right.substring(i));
                     return list;
+                } else {
+                    list.add(right.substring(i, index));
                 }
                 i = index - 1;
             }
@@ -402,7 +406,7 @@ class Rule {
      * @param str
      * @return 去除首尾字符
      */
-    public String removeSign(String str) {
+    public static String removeSign(String str) {
         return str.substring(1, str.length() - 1);
     }
 
@@ -410,4 +414,16 @@ class Rule {
         return "<" + left + "> -> " + right;
     }
 
+    /**
+     * 是否为终结符
+     * @param sign
+     * @return true: 是
+     */
+    public static boolean isVt(String sign) {
+        return !sign.startsWith("<") || !sign.endsWith(">");
+    }
+
+    public static boolean isVn(String sign) {
+        return !isVt(sign);
+    }
 }
