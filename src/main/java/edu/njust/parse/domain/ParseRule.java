@@ -187,25 +187,6 @@ public class ParseRule {
         }
 
         List<String> symbols = rule.getRightList();
-//        // 获取右部所有非终结符
-//        for (int i = right.indexOf("<"); i < right.length() && i != -1; ++i) {
-//
-//            if (right.charAt(i) == '<' && right.indexOf(">", i) != -1) {
-//                int index = right.indexOf(">", i);
-//                symbols.add(right.substring(i, index + 1));
-//                i = index;
-//            } else {
-//
-//                symbols.add(String.valueOf(right.charAt(i)));
-//
-//                int index = right.indexOf('<', i + 1);
-//                if (index == -1) {
-//                    break;
-//                }
-//                i = index - 1;
-//            }
-//
-//        }
 
         for (int i = symbols.size() - 1; i >= 0; i--) {
 
@@ -295,7 +276,7 @@ public class ParseRule {
         for (String str : rightList) {
             set.add(str);
             // 第一个非终结符
-            if (Rule.isVt(str) || types.contains(Rule.removeSign(str))) {
+            if (Rule.isVt(str) || types.contains(str)) {
                 break;
             }
         }
@@ -411,7 +392,7 @@ class Rule {
     }
 
     public String getOrigin() {
-        return "<" + left + "> -> " + right;
+        return left + " -> " + right;
     }
 
     /**

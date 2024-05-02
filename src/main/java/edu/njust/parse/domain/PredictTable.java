@@ -51,7 +51,13 @@ public class PredictTable {
             Set<String> first = getFirst(rule);
             for (String vt : first) {
                 int columnIndex = columnMap.get(vt);
+
+                if (len[columnIndex] != null) {
+                    System.out.println("pre: " + len[columnIndex] + " \nafter: " + rule.getOrigin());
+                    throw new RuntimeException("error: [" + rowIndex + ", " + columnIndex + "]");
+                }
                 len[columnIndex] = rule.getOrigin();
+                //TODO 可以推出空串
             }
 
         }
