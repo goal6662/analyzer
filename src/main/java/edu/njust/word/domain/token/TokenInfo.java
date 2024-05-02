@@ -13,6 +13,10 @@ public class TokenInfo {
 
     private String content;
 
+    public TokenInfo(String content) {
+        this.content = content;
+    }
+
     public String getInfo() {
         return "token: (行号: " + len + ", 类别: " + type  + ", 内容: " + content + ")";
     }

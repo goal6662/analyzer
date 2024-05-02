@@ -32,5 +32,6 @@ public class TokenType {
      * 数据类型
      */
     public static final String TYPE = "type";
+    public static final String ERROR = "error";
 
 }

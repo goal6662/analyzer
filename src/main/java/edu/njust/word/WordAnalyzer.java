@@ -40,12 +40,15 @@ public class WordAnalyzer {
         Map<String, List<TokenInfo>> info = new HashMap<>();
         Matcher matcher = new Matcher("word/lex.txt");
 
-        for (String type : dfa.keySet()) {
-            List<TokenInfo> infos = matcher.match(type, dfa.get(type));
-            info.put(type, infos);
-        }
+//        List<TokenInfo> match = matcher.match(dfa);
+//        TokenInfo tokenInfo = match.get(1);
+//
+//        for (String type : dfa.keySet()) {
+//            List<TokenInfo> infos = matcher.match(type, dfa.get(type));
+//            info.put(type, infos);
+//        }
 
-        matcher.writeToFile("word/out10.txt", info);
+        matcher.writeToFile("word/out10.txt", matcher.match(dfa));
     }
 
     public static void printNFA(Map<String, NFA> nfa) {

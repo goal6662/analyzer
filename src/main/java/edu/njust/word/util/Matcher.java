@@ -1,5 +1,6 @@
 package edu.njust.word.util;
 
+import edu.njust.common.Constant;
 import edu.njust.common.TokenType;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.dfa.DFAState;
@@ -28,6 +29,123 @@ public class Matcher {
             fileData.add(content.trim());
         }
         reader.close();
+    }
+
+
+    public Map<String, List<TokenInfo>> match(Map<String, DFA> dfaMap) {
+        List<TokenInfo> infos = new ArrayList<>();
+        Map<String, List<TokenInfo>> infoMap = new HashMap<>();
+        // 记录行号
+        int len = 1;
+        for (String content : fileData) {
+
+            for (String type : dfaMap.keySet()) {
+                List<TokenInfo> tokenInfoList = matchLen(content + " ", dfaMap.get(type));
+                int curLen = len;
+                tokenInfoList.forEach((info) -> {
+                    info.setLen(curLen);
+
+                    if (info.getType() == null) {
+                        info.setType(type);
+                    }
+                });
+                List<TokenInfo> cur = infoMap.getOrDefault(type, new ArrayList<>());
+                cur.addAll(tokenInfoList);
+                infoMap.put(type, cur);
+            }
+            len += 1;
+        }
+
+        // 去重
+        Set<String> kt = new HashSet<>();
+        infoMap.get(TokenType.TYPE).forEach((info) -> kt.add(info.getContent()));
+        infoMap.get(TokenType.KEY_WORD).forEach((info) -> kt.add(info.getContent()));
+
+        List<TokenInfo> list = new ArrayList<>();
+        List<TokenInfo> infoList = infoMap.get(TokenType.IDENTIFIER);
+        for (TokenInfo info : infoList) {
+            if (!kt.contains(info.getContent())) {
+                list.add(info);
+            }
+        }
+        infoMap.put(TokenType.IDENTIFIER, list);
+        return infoMap;
+//
+//        infoMap.values().forEach(infos::addAll);
+//        return infos;
+    }
+
+    private List<TokenInfo> matchLen(String content, DFA dfa) {
+        List<TokenInfo> infos = new ArrayList<>();
+
+        DFAState curState = dfa.getStartState();
+        StringBuilder builder = new StringBuilder();
+
+        // 当前字符是否有误
+        boolean isError = false;
+
+        for (int i = 0; i < content.length();) {
+            // 逐个字符判断
+            String curStr = String.valueOf(content.charAt(i));
+
+            // 不是则不匹配
+            if (dfa.getStartState() == curState && !dfa.getTransitions().get(curState).containsKey(curStr)) {
+
+                // 跳过界符
+                if (isDelimiter(curStr)) {
+                    ++i;
+                }
+
+                while (!isDelimiter(curStr)) {
+                    ++i;
+                    curStr = String.valueOf(content.charAt(i));
+                }
+                continue;
+            }
+
+            if (isError) {
+                if (isDelimiter(curStr)) {
+                    // 清零，重新开始匹配
+                    curState = dfa.getStartState();
+//                    infos.add(new TokenInfo(0, TokenType.ERROR, builder.toString()));
+                    builder = new StringBuilder();
+                    isError = false;
+
+                } else {
+                    builder.append(curStr);
+                    ++i;
+                }
+                continue;
+            }
+
+            if (dfa.getTransitions().get(curState).containsKey(curStr)) {
+                builder.append(curStr);
+                ++i;
+                // 转至下一个状态
+                curState = dfa.getTransitions().get(curState).get(curStr);
+            } else {
+                // 正常完结
+                if (isDelimiter(curStr) && curState.isAccept()) {
+                    if (builder.length() > 0) {
+                        infos.add(new TokenInfo(builder.toString()));
+                    }
+                    builder = new StringBuilder();
+                    curState = dfa.getStartState();
+                } else {
+                    // 这是一个错误的字符
+                    isError = true;
+                    builder.append(curStr);
+                    ++i;
+                }
+            }
+
+        }
+        return infos;
+    }
+
+    private boolean isDelimiter(String s) {
+        Set<String> set = new HashSet<>(Arrays.asList("(", ")", "{", "}", "[", "]", ",", ";", " "));
+        return set.contains(s);
     }
 
     public List<TokenInfo> defaultMatch(String type, DFA dfa) {
