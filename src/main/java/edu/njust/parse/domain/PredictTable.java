@@ -57,9 +57,21 @@ public class PredictTable {
                     throw new RuntimeException("error: [" + rowIndex + ", " + columnIndex + "]");
                 }
                 len[columnIndex] = rule.getOrigin();
-                //TODO 可以推出空串
+
             }
 
+            //TODO 可以推出空串
+            Vn left = vnMap.get(rule.getLeft());
+            if (left.getFirst().contains(Constant.EPSILON)) {
+                for (String next : left.getFollow()) {
+                    int columnIndex = columnMap.get(next);
+//                    if (len[columnIndex] != null) {
+//                        System.out.println("pre: " + len[columnIndex] + " \nafter: " + rule.getOrigin());
+//                        throw new RuntimeException("error: [" + rowIndex + ", " + columnIndex + "]");
+//                    }
+                    len[columnIndex] = rule.getLeft() + " -> " + Constant.EPSILON;
+                }
+            }
         }
     }
 

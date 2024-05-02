@@ -94,23 +94,12 @@ public class ParseRule {
         Set<String> vts = new HashSet<>();
         types.values().forEach(vts::addAll);
         for (Rule rule : rules) {
-            String right = rule.getRight();
-            for (int i = 0; i < right.length(); i++) {
-                if (right.charAt(i) == '<' && right.indexOf('>', i + 1) != -1) {
-                    i = right.indexOf('>', i);
-                } else {
-                    String sign;
-                    int index = right.indexOf('<', i + 1);
-                    if (index == -1) {
-                        vts.add(right.substring(i));
-                        break;
-                    } else {
-                        sign = right.substring(i, index);
-                        i = index - 1;
-                    }
-                    vts.add(sign);
+            List<String> rightList = rule.getRightList();
+            rightList.forEach((item) -> {
+                if (Rule.isVt(item)) {
+                    vts.add(item);
                 }
-            }
+            });
         }
         return vts;
     }
@@ -180,11 +169,6 @@ public class ParseRule {
     }
     private void generateNextFollow(Rule rule, Map<String, Vn> map) {
         String left = rule.getLeft();
-        String right = rule.getRight();
-
-        if (Rule.isVt(right)) {
-            return;
-        }
 
         List<String> symbols = rule.getRightList();
 
@@ -200,8 +184,6 @@ public class ParseRule {
                 for (int j = i + 1; j < symbols.size(); j++) {
                     String sym = symbols.get(j);
                     if (Rule.isVn(sym)) {
-                        // 去掉标识符
-//                        sym = Rule.removeSign(sym);
                         Vn next = map.get(sym);
                         // 一定会添加First集
                         cur.getFollow().addAll(next.getFirst());
@@ -281,26 +263,6 @@ public class ParseRule {
             }
         }
 
-//        for (int i = 0; i < right.length();) {
-//            if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
-//                int index = right.indexOf('>', i);
-//                String symbol = right.substring(i + 1, index);
-//                set.add(symbol);
-//                // 终结符集合
-//                if (types.contains(symbol)) {
-//                    break;
-//                }
-//                i = index + 1;
-//            } else {
-//                int index = right.indexOf("<");
-//                if (index == -1) {
-//                    set.add(right.substring(i));
-//                } else {
-//                    set.add(right.substring(i, index));
-//                }
-//                break;
-//            }
-//        }
         return set;
     }
 
@@ -349,8 +311,6 @@ class Rule {
     public Rule(String rule) {
         String[] split = rule.split(" -> ");
 
-        // 左部可以直接去掉尖括号
-//        this.left = removeSign(split[0]);
         this.left = split[0];
         this.right = split[1];
         this.rightList = generateRightSet();

@@ -332,12 +332,24 @@ public class Matcher {
             });
         }
 
+        Set<String> kt = new HashSet<>();
+        infos.get(TokenType.KEY_WORD).forEach((item) -> kt.add(item.getContent()));
+        infos.get(TokenType.TYPE).forEach((item) -> kt.add(item.getContent()));
+
         writer.write("-----------");
         writer.newLine();
         for (String type : infos.keySet()) {
             // 对应符号集合
             Set<String> sets = new HashSet<>();
-            infos.get(type).forEach(info -> sets.add(info.getContent()));
+            if (type.equals(TokenType.IDENTIFIER)) {
+                infos.get(type).forEach(info -> {
+                    if (!kt.contains(info.getContent())) {
+                        sets.add(info.getContent());
+                    }
+                });
+            } else {
+                infos.get(type).forEach((info) -> sets.add(info.getContent()));
+            }
             writer.write(type + ": " + sets);
             writer.newLine();
         }
