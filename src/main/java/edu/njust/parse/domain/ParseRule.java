@@ -18,6 +18,8 @@ public class ParseRule {
 
     private final List<String> ruleList = new ArrayList<>();
 
+    private final List<Rule> rules = new ArrayList<>();
+
     private final Map<String, Set<String>> types;
 
     private final String start;
@@ -48,6 +50,7 @@ public class ParseRule {
             if (rule.isEmpty() || rule.startsWith("#")) {
                 continue;
             }
+            rules.add(new Rule(rule));
             ruleList.add(rule);
         }
         this.types = readTypeInfo(outFile);
@@ -349,6 +352,53 @@ public class ParseRule {
 
 
         return map;
+    }
+
+}
+
+
+@Getter
+class Rule {
+    private final String left;
+    private final String right;
+    private final List<String> rightSet;
+
+    public Rule(String rule) {
+        String[] split = rule.split(" -> ");
+
+        // 左部可以直接去掉尖括号
+        this.left = removeSign(split[0]);
+        this.right = split[1];
+        this.rightSet = generateRightSet();
+    }
+
+    private List<String> generateRightSet() {
+        List<String> list = new ArrayList<>();
+
+        // 1. 获取第一个符号
+        for (int i = 0; i < right.length(); i++) {
+            if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
+                // 截取并加入
+                int index = right.indexOf('>', i);
+                String symbol = right.substring(i, index + 1);
+                list.add(symbol);
+                i = index;
+            } else {
+                list.add(String.valueOf(right.charAt(i)));
+
+                int index = right.indexOf('<', i + 1);
+                if (index == -1) {
+                    return list;
+                }
+                i = index - 1;
+            }
+        }
+
+        return list;
+    }
+
+    private String removeSign(String str) {
+        return str.substring(1, str.length() - 1);
     }
 
 }
