@@ -1,10 +1,12 @@
 package edu.njust.parse.domain;
 
+import lombok.Getter;
 import lombok.ToString;
 
 import java.io.IOException;
 import java.util.Set;
 
+@Getter
 @ToString
 public class Project {
 

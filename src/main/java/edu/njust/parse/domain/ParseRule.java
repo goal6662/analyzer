@@ -2,6 +2,7 @@ package edu.njust.parse.domain;
 
 import edu.njust.common.Constant;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -93,16 +94,19 @@ public class ParseRule {
     private Set<String> generateVt() {
         // TODO: 2024/5/1 存在BUG：引用类型的终结符还未加入
         Set<String> vts = new HashSet<>();
-        for (String rule : ruleList) {
-            char[] right = rule.split(" -> ")[1].toCharArray();
-            for (int i = 0; i < right.length;) {
-                if (right[i] == '<') {
-                    while (i < right.length && right[i] != '>') {
-                        ++i;
-                    }
+//        types.values().forEach(vts::addAll);
+        for (Rule rule : rules) {
+            String right = rule.getRight();
+            for (int i = 0; i < right.length(); i++) {
+                if (right.charAt(i) == '<' && right.indexOf('>', i + 1) != -1) {
+                    i = right.indexOf('>', i);
                 } else {
-                    vts.add(String.valueOf(right[i]));
-                    ++i;
+                    vts.add(String.valueOf(right.charAt(i)));
+                    int index = right.indexOf('<', i + 1);
+                    if (index == -1) {
+                        break;
+                    }
+                    i = index - 1;
                 }
             }
         }
@@ -320,22 +324,18 @@ public class ParseRule {
      */
     private Map<String, Vn> getAllVn() {
         Map<String, Vn> map = new HashMap<>();
-        for (String rule : ruleList) {
-            String[] split = rule.split(" -> ");
+        for (Rule rule : rules) {
 
             // 左部一定是非终结符
-            String left = split[0];
-            String right = split[1];
-            String symbol = split[0].substring(1, left.length() - 1);
+            String left = rule.getLeft();
+            Vn vn = map.getOrDefault(left, new Vn(left));
+            map.put(left, vn);
 
-            Vn vn = map.getOrDefault(symbol, new Vn(symbol));
-            map.put(symbol, vn);
+            for (String sign : rule.getRightList()) {
+                if (sign.length() > 1) {
+                    String symbol = rule.removeSign(sign);
 
-            for (int i = 0; i < right.length(); ++i) {
-                if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
-                    int index = right.indexOf('>', i);
-                    symbol = right.substring(i + 1, index);
-                    // 终结符集合
+                    // 加入引用符号
                     if (types.containsKey(symbol)) {
                         Vn temp = map.getOrDefault(symbol, new Vn(symbol));
 
@@ -345,11 +345,10 @@ public class ParseRule {
                         temp.getFirst().addAll(list);
                         map.put(symbol, temp);
                     }
-                    i = index;
+
                 }
             }
         }
-
 
         return map;
     }
@@ -358,10 +357,11 @@ public class ParseRule {
 
 
 @Getter
+@ToString
 class Rule {
     private final String left;
     private final String right;
-    private final List<String> rightSet;
+    private final List<String> rightList;
 
     public Rule(String rule) {
         String[] split = rule.split(" -> ");
@@ -369,7 +369,7 @@ class Rule {
         // 左部可以直接去掉尖括号
         this.left = removeSign(split[0]);
         this.right = split[1];
-        this.rightSet = generateRightSet();
+        this.rightList = generateRightSet();
     }
 
     private List<String> generateRightSet() {
@@ -397,8 +397,17 @@ class Rule {
         return list;
     }
 
-    private String removeSign(String str) {
+    /**
+     * <str> -> str
+     * @param str
+     * @return 去除首尾字符
+     */
+    public String removeSign(String str) {
         return str.substring(1, str.length() - 1);
+    }
+
+    public String getOrigin() {
+        return "<" + left + "> -> " + right;
     }
 
 }
