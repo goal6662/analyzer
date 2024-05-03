@@ -2,13 +2,12 @@ package edu.njust.parse;
 
 import edu.njust.common.Constant;
 import edu.njust.common.TokenType;
-import edu.njust.parse.domain.AnalyzerResult;
-import edu.njust.parse.domain.PredictTable;
-import edu.njust.parse.domain.Project;
-import edu.njust.parse.domain.Rule;
+import edu.njust.parse.domain.*;
 import edu.njust.word.domain.token.TokenInfo;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -21,6 +20,7 @@ public class ParserAnalyzer {
 
     public AnalyzerResult analyzer() {
 
+        List<Point> analyzeProcess = new ArrayList<>();
         PredictTable table = project.getTable();
         // 当前符号栈
         Stack<String> curStack = new Stack<>();
@@ -29,6 +29,9 @@ public class ParserAnalyzer {
 
         for (int i = 0; i < tokens.size(); ++i) {
             TokenInfo input = tokens.get(i);
+//
+//            Point point = new Point(curStack, input.getContent(), tokens.subList(i + 1, tokens.size()));
+//            analyzeProcess.add(point);
 
             // 值匹配，执行下一轮
             String curSign = curStack.peek();
@@ -42,17 +45,24 @@ public class ParserAnalyzer {
 
             // 遇到错误
             if (input.getType().equals(TokenType.ERROR)) {
-                return new AnalyzerResult(input.getContent());
+                return new AnalyzerResult(input.getContent(), analyzeProcess);
             }
 
-            String ruleInfo = table.getRule(rowSign, columnSign);
-            if (ruleInfo == null) {
-                return new AnalyzerResult("类型不匹配");
+            String typeMatch = table.getRule(rowSign, columnSign);
+            String valueMatch = table.getRule(rowSign, input.getContent());
+
+
+            if (typeMatch == null && valueMatch == null) {
+                if (input.getContent().equals(";")) {
+                    return new AnalyzerResult(input.getRow() + "行缺少 ; ", analyzeProcess);
+                }
+                return new AnalyzerResult("类型不匹配: " + input.getInfo(), analyzeProcess);
             }
 
+            String ruleInfo = valueMatch == null ? typeMatch : valueMatch;
             // 产生式匹配
             curStack.pop();
-            Rule rule = new Rule(table.getRule(rowSign, columnSign));
+            Rule rule = new Rule(ruleInfo);
             List<String> rightList = rule.getRightList();
             for (int j = rightList.size() - 1; j >= 0; j--) {
                 // 推出空直接退出

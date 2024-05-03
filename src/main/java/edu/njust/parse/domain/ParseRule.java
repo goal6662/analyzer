@@ -45,7 +45,7 @@ public class ParseRule {
         String rule;
         while ((rule = reader.readLine()) != null) {
             // 跳过注释和空行
-            if (rule.isEmpty() || rule.startsWith("#")) {
+            if (rule.trim().isEmpty() || rule.startsWith("#")) {
                 continue;
             }
             rules.add(new Rule(rule));

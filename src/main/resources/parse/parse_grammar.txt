@@ -28,7 +28,7 @@
 # <param> -> <-type-><-identifier->,<param>
 # <param> -> <-type-><-identifier->
 # <param> -> ε
-<function> -> fun<-type-><-identifier->(<param>)<body>
+<function> -> public<-type-><-identifier->(<param>)<body>
 <param> -> <-type-><type@>
 <type@> -> <-identifier-><identifier@>
 <identifier@> -> ,<param>
@@ -41,7 +41,9 @@
 <statements> -> ε
 
 # 声名语句
-<statement> -> <-type-><-identifier->;
+# <statement> -> <-type-><-identifier->;
+# 声名兼赋值
+<statement> -> <-type-><-identifier->=<expression>;
 
 # 赋值语句
 <statement> -> <assign>

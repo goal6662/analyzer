@@ -1,6 +1,9 @@
 package edu.njust.parse.domain;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @NoArgsConstructor
 public class AnalyzerResult {
@@ -8,8 +11,12 @@ public class AnalyzerResult {
 
     private String message;
 
-    public AnalyzerResult(String message) {
+    @Getter
+    private List<Point> analyzeProcess;
+
+    public AnalyzerResult(String message, List<Point> analyzeProcess) {
         this.message = message;
+        this.analyzeProcess = analyzeProcess;
         this.isSuccess = false;
     }
 
