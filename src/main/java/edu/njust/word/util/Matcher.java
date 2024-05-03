@@ -1,6 +1,5 @@
 package edu.njust.word.util;
 
-import edu.njust.common.Constant;
 import edu.njust.common.TokenType;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.dfa.DFAState;
@@ -31,8 +30,7 @@ public class Matcher {
         reader.close();
     }
 
-
-    public Map<String, List<TokenInfo>> match(Map<String, DFA> dfaMap) {
+    public List<TokenInfo> match(Map<String, DFA> dfaMap) {
         List<TokenInfo> infos = new ArrayList<>();
         Map<String, List<TokenInfo>> infoMap = new HashMap<>();
         // 记录行号
@@ -52,6 +50,8 @@ public class Matcher {
                 List<TokenInfo> cur = infoMap.getOrDefault(type, new ArrayList<>());
                 cur.addAll(tokenInfoList);
                 infoMap.put(type, cur);
+
+                infos.addAll(tokenInfoList);
             }
             len += 1;
         }
@@ -62,17 +62,13 @@ public class Matcher {
         infoMap.get(TokenType.KEY_WORD).forEach((info) -> kt.add(info.getContent()));
 
         List<TokenInfo> list = new ArrayList<>();
-        List<TokenInfo> infoList = infoMap.get(TokenType.IDENTIFIER);
-        for (TokenInfo info : infoList) {
-            if (!kt.contains(info.getContent())) {
-                list.add(info);
+        for (TokenInfo info : infos) {
+            if (info.getType().equals(TokenType.IDENTIFIER) && kt.contains(info.getContent())) {
+                continue;
             }
+            list.add(info);
         }
-        infoMap.put(TokenType.IDENTIFIER, list);
-        return infoMap;
-//
-//        infoMap.values().forEach(infos::addAll);
-//        return infos;
+        return list;
     }
 
     private List<TokenInfo> matchLen(String content, DFA dfa) {
@@ -84,7 +80,7 @@ public class Matcher {
         // 当前字符是否有误
         boolean isError = false;
 
-        for (int i = 0; i < content.length();) {
+        for (int i = 0; i < content.length(); ) {
             // 逐个字符判断
             String curStr = String.valueOf(content.charAt(i));
 
@@ -148,290 +144,34 @@ public class Matcher {
         return set.contains(s);
     }
 
-    public List<TokenInfo> defaultMatch(String type, DFA dfa) {
-        List<TokenInfo> infos = new ArrayList<>();
-        // 1. 记录行号
-        int len = 1;
-
-        for (String content : fileData) {
-            DFAState curState = dfa.getStartState();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < content.length(); i++) {
-                // 1. 获取转移字符
-                String symbol = String.valueOf(content.charAt(i));
-                if (curState == null) {
-                    // TODO: 2024/4/9 开始字符不匹配，接下来的所有字符也不应该进行匹配
-                    curState = dfa.getStartState();
-                }
-
-                DFAState nextState = dfa.getTransitions().get(curState).get(symbol);
-                if (nextState == null) {
-
-                    // 当前字符未能匹配
-                    int space = content.indexOf(' ', i);
-                    // 存在下一个匹配项
-                    if (space != -1) {
-                        i = space;
-                    } else {
-                        break;
-                    }
-                    if (builder.length() > 0 && curState.isAccept()) {
-                        infos.add(new TokenInfo(len, type, builder.toString()));
-                        builder = new StringBuilder();
-                    }
-
-                } else {
-                    builder.append(symbol);
-                }
-
-                curState = nextState;
-
-            }
-
-            if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, type, builder.toString()));
-            }
-            ++len;
-        }
-
-        return infos;
-    }
-
-    /**
-     * @param dfa
-     * @return
-     */
-    public List<TokenInfo> operatorMatch(DFA dfa) {
-        List<TokenInfo> infos = new ArrayList<>();
-        // 1. 记录行号
-        int len = 1;
-
-        for (String content : fileData) {
-            DFAState curState = dfa.getStartState();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < content.length(); i++) {
-                // 1. 获取转移字符
-                String symbol = String.valueOf(content.charAt(i));
-                if (curState == null) {
-                    curState = dfa.getStartState();
-                }
-
-                if (!dfa.getTransitions().get(curState).containsKey(symbol)) {
-                    if (builder.length() > 0) {
-                        infos.add(new TokenInfo(len, TokenType.OPERATOR, builder.toString()));
-                        builder = new StringBuilder();
-                    }
-                } else {
-                    builder.append(symbol);
-                }
-
-                curState = dfa.getTransitions().get(curState).get(symbol);
-
-            }
-
-            if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, TokenType.OPERATOR, builder.toString()));
-            }
-            ++len;
-        }
-
-        return infos;
-    }
-
-    /**
-     * 使用所有DFA，匹配文本
-     *
-     * @param dfa dfa
-     * @return
-     */
-    public List<TokenInfo> match(String type, DFA dfa) {
-        List<TokenInfo> infos = new ArrayList<>();
-        switch (type) {
-            case TokenType.DELIMITER:
-                infos.addAll(delimitersMatch(dfa));
-                break;
-            case TokenType.KEY_WORD:
-            case TokenType.TYPE:
-                infos.addAll(keywordMatch(dfa, type));
-                break;
-            case TokenType.CONSTANT:
-                infos.addAll(constantMatch(dfa));
-                break;
-            case TokenType.OPERATOR:
-                infos.addAll(operatorMatch(dfa));
-                break;
-            default:
-                infos.addAll(defaultMatch(type, dfa));
-                break;
-        }
-        return infos;
-    }
-
-    /**
-     * 匹配分隔符
-     * @param dfa
-     * @return
-     */
-    private List<TokenInfo> delimitersMatch(DFA dfa) {
-        List<TokenInfo> infos = new ArrayList<>();
-        // 1. 记录行号
-        int len = 1;
-        for (String content : fileData) {
-            DFAState curState = dfa.getStartState();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < content.length(); i++) {
-                // 1. 获取转移字符
-                String symbol = String.valueOf(content.charAt(i));
-
-                if (curState == null) {
-                    curState = dfa.getStartState();
-                }
-
-                DFAState nextState = dfa.getTransitions().get(curState).get(symbol);
-                // 当前字符未被包含
-                if (nextState == null) {
-                    // 存放结果
-                    if (builder.length() > 0) {
-                        infos.add(new TokenInfo(len, TokenType.DELIMITER, builder.toString()));
-                        builder = new StringBuilder();
-                    }
-
-                    // 起始状态是否包含当前字符
-                    if (dfa.getTransitions().get(dfa.getStartState()).containsKey(symbol)) {
-                        builder.append(symbol);
-                    }
-                } else {
-                    // 当前字符可被转移
-                    builder.append(symbol);
-                }
-                curState = nextState;
-            }
-            // 判断最后一个字符的情况
-            if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, TokenType.DELIMITER, builder.toString()));
-            }
-            ++len;
-        }
-        return infos;
-    }
-
-    /**
-     * 关键字匹配
-     *
-     * @param dfa
-     * @return
-     */
-    private List<TokenInfo> keywordMatch(DFA dfa, String type) {
-        List<TokenInfo> infos = new ArrayList<>();
-        // 1. 记录行号
-        int len = 1;
-        for (String content : fileData) {
-            DFAState curState = dfa.getStartState();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < content.length(); i++) {
-                // 1. 获取转移字符
-                String symbol = String.valueOf(content.charAt(i));
-
-                if (curState == null) {
-                    curState = dfa.getStartState();
-                    builder = new StringBuilder();
-                }
-
-                DFAState nextState = dfa.getTransitions().get(curState).get(symbol);
-                // 当前字符未被包含
-                if (nextState == null) {
-                    // 存放结果
-                    if (builder.length() > 0 && curState.isAccept()) {
-                        infos.add(new TokenInfo(len, type, builder.toString()));
-                        builder = new StringBuilder();
-                    }
-                } else {
-                    // 当前字符可被转移
-                    builder.append(symbol);
-                }
-                curState = nextState;
-            }
-            // 判断最后一个字符的情况
-            if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, type, builder.toString()));
-            }
-            ++len;
-        }
-        return infos;
-    }
-
-
-    private List<TokenInfo> constantMatch(DFA dfa) {
-        List<TokenInfo> infos = new ArrayList<>();
-        // 1. 记录行号
-        int len = 1;
-
-        for (String content : fileData) {
-            DFAState curState = dfa.getStartState();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < content.length(); i++) {
-                // 1. 获取转移字符
-                String symbol = String.valueOf(content.charAt(i));
-                if (curState == null) {
-                    curState = dfa.getStartState();
-                }
-
-                DFAState nextState = dfa.getTransitions().get(curState).get(symbol);
-                if (nextState == null) {
-                    int temp = i;
-                    // 当前字符未能匹配
-                    int space = content.indexOf(' ', i);
-                    // 存在下一个匹配项
-                    if (space != -1) {
-                        i = space;
-                    } else {
-                        break;
-                    }
-
-                    if (builder.length() > 0) {
-                        if (content.charAt(temp + 1) == ' ') {
-                            infos.add(new TokenInfo(len, TokenType.CONSTANT, builder.toString()));
-                        }
-                        builder = new StringBuilder();
-                    }
-                } else {
-                    builder.append(symbol);
-                }
-
-                curState = nextState;
-
-            }
-            if (curState != null && curState.isAccept() && builder.length() > 0) {
-                infos.add(new TokenInfo(len, TokenType.CONSTANT, builder.toString()));
-            }
-            ++len;
-        }
-
-        return infos;
-    }
-
-
-    /**
-     * Warning: 写入的文件在target目录下
-     *
-     * @param outputFile
-     * @param infos
-     * @throws IOException
-     */
     public void writeToFile(String outputFile, List<TokenInfo> infos) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(outputFile);
 
+        Map<String, Set<String>> map = new HashMap<>();
         assert url != null;
         BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath()));
 
-        for (TokenInfo tokenInfo : infos) {
-            writer.write(tokenInfo.getInfo());
+        for (TokenInfo info : infos) {
+            writer.write(info.getInfo());
+            writer.newLine();
+
+            Set<String> cur = map.getOrDefault(info.getType(), new HashSet<>());
+            cur.add(info.getContent());
+            map.put(info.getType(), cur);
+        }
+
+        writer.write("-----------");
+        writer.newLine();
+        for (String type : map.keySet()) {
+            writer.write(type + ": " + map.get(type));
             writer.newLine();
         }
+
         writer.flush();
         writer.close();
 
     }
+
 
     public void writeToFile(String outputFile, Map<String, List<TokenInfo>> infos) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(outputFile);
