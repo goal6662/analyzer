@@ -54,7 +54,7 @@ public class ParseRule {
             rules.add(new Rule(rule));
             ruleList.add(rule);
         }
-        this.types = readTypeInfo(outFile);
+        this.types = new HashMap<>();
         this.start = start;
 
         this.vns = generateVn();
