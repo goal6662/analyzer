@@ -6,10 +6,7 @@ import edu.njust.parse.domain.*;
 import edu.njust.word.domain.token.TokenInfo;
 import lombok.AllArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 @AllArgsConstructor
 public class ParserAnalyzer {
@@ -49,17 +46,26 @@ public class ParserAnalyzer {
 
             // 遇到错误
             if (input.getType().equals(TokenType.ERROR)) {
-                return new AnalyzerResult(input.getContent(), analyzeProcess);
+                return new AnalyzerResult(input.getInfo(), analyzeProcess);
             }
 
             String valueMatch = table.getRule(rowSign, input.getContent());
             if (valueMatch == null) {
-                if (input.getContent().equals(";")) {
-                    return new AnalyzerResult(input.getRow() + "行缺少 ; ", analyzeProcess);
+                if (Rule.isVt(curSign)) {
+                    return new AnalyzerResult("类型不匹配: \n"
+                            + "Expect:" + curSign + "\t" + "Get:" + input.getContent() + "\n"
+                            + input.getInfo(), analyzeProcess);
                 }
-                return new AnalyzerResult("类型不匹配: " + input.getInfo(), analyzeProcess);
+
+                Set<String> acceptSign = table.getAcceptSign(curSign);
+                return new AnalyzerResult("类型不匹配: \n"
+                        + "Expect:" + acceptSign + "\t" + "Get:" + input.getContent() + "\n"
+                        + input.getInfo(), analyzeProcess);
             }
 
+            if (valueMatch.startsWith("\"") && valueMatch.endsWith("\"")) {
+                valueMatch = Rule.removeSign(valueMatch);
+            }
             point.setRule(valueMatch);
             // 产生式匹配
             curStack.pop();
@@ -77,7 +83,6 @@ public class ParserAnalyzer {
                 curStack.add(item);
             }
             i -= 1;
-
         }
         return new AnalyzerResult(analyzeProcess);
     }

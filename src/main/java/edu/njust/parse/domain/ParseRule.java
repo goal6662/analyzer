@@ -57,6 +57,9 @@ public class ParseRule {
         // 追加数据
         for (String key : tokenMap.keySet()) {
             for (String item : tokenMap.get(key)) {
+                if (item.isEmpty()) {
+                    item = "$";
+                }
                 rules.add(new Rule(key + " -> " + item));
             }
         }

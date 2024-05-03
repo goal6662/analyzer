@@ -42,7 +42,13 @@ public class Matcher {
         for (String content : fileData) {
 
             for (String type : dfaMap.keySet()) {
-                List<TokenInfo> tokenInfoList = matchLen(content + " ", dfaMap.get(type));
+                List<TokenInfo> tokenInfoList;
+                if (type.equals(TokenType.DELIMITER)) {
+                    tokenInfoList = matchDelimiter(content, dfaMap.get(type));
+                } else {
+                    tokenInfoList = matchLen(content + " ", dfaMap.get(type));
+                }
+
                 int curLen = len;
                 tokenInfoList.forEach((info) -> {
                     info.setRow(curLen);
@@ -144,11 +150,25 @@ public class Matcher {
                 } else {
                     // 这是一个错误的字符
                     isError = true;
-                    builder.append(curStr);
-                    ++i;
+//                    builder.append(curStr);
+//                    ++i;
                 }
             }
 
+        }
+        return infos;
+    }
+
+    private List<TokenInfo> matchDelimiter(String content, DFA dfa) {
+        List<TokenInfo> infos = new ArrayList<>();
+
+        DFAState startState = dfa.getStartState();
+
+        for (int i = 0; i < content.length(); i++) {
+            String curSign = String.valueOf(content.charAt(i));
+            if (dfa.getTransitions().get(startState).containsKey(curSign)) {
+                infos.add(new TokenInfo(i, curSign));
+            }
         }
         return infos;
     }
@@ -200,8 +220,12 @@ public class Matcher {
 
         writer.write("-----------");
         writer.newLine();
-        for (String type : map.keySet()) {
-            writer.write(type + ": " + map.get(type));
+        for (String type : TokenType.TYPE_LIST) {
+            if (map.containsKey(type)) {
+                writer.write(type + ": " + map.get(type));
+            } else {
+                writer.write(type + ": []");
+            }
             writer.newLine();
         }
 

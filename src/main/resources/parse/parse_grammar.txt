@@ -8,16 +8,20 @@
 # 表达式 暂不支持字符串
 <expression> -> (<expression>)
 <expression> -> <constant><constant@>
+<expression> -> <identifier><exp_@>
+<exp_@> -> <operator><expression>
+<exp_@> -> ε
 <constant@> -> <operator><expression>
 <constant@> -> ε
-<expression> -> <identifier><operator><expression>
 
 # 语句体
 <body> -> {<statements>}
 
 
 # 条件语句
-<condition> -> (<constant><judge><constant>)
+<condition> -> (<condition_ext>)
+<condition_ext> -> <constant><judge><constant>
+<condition_ext> -> <identifier><judge><constant>
 
 <start> -> <project>
 <project> -> <statements>
@@ -62,7 +66,10 @@
 <identifier@> -> ^=
 
 # 条件判断
-<statement> -> if<condition><body>
+<statement> -> if<if_state>
+<if_state> -> <condition><body><else_state>
+<else_state> -> else<body>
+<else_state> -> ε
 
 # 循环
 <statement> -> while<condition><body>

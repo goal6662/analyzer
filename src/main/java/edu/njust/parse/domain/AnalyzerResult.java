@@ -31,7 +31,8 @@ public class AnalyzerResult {
         if (isSuccess) {
             return "匹配成功";
         } else {
-            return "存在错误：" + message + "\n";
+            return "存在错误-" + message + "\n";
+//                    + "可以尝试在token前添加Except内的字符\n";
         }
     }
 

@@ -1,5 +1,9 @@
 package edu.njust.common;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class TokenType {
 
     /**
@@ -34,5 +38,9 @@ public class TokenType {
     public static final String TYPE = "type";
     public static final String ERROR = "error";
     public static final String MODIFIER = "modifier";
+
+    public static final Set<String> TYPE_LIST = new HashSet<>(
+            Arrays.asList(TYPE, KEY_WORD, IDENTIFIER, CONSTANT, DELIMITER, OPERATOR, ERROR, MODIFIER)
+    );
 
 }
