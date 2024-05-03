@@ -42,6 +42,13 @@ public class PredictTable {
         fillTable(rule.getRules());
     }
 
+    public String getRule(String rowSign, String columnSign) {
+        if (!rowMap.containsKey(rowSign) || !columnMap.containsKey(columnSign)) {
+            return null;
+        }
+        return table[rowMap.get(rowSign)][columnMap.get(columnSign)];
+    }
+
     private void fillTable(List<Rule> rules) {
         hasFillTable = true;
         for (Rule rule : rules) {

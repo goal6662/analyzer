@@ -13,7 +13,7 @@ public class Project {
     /**
      * 文法开始符号
      */
-    public static final String START = "<start>";
+    private final String START = "<start>";
 
     /**
      * 非终结符的集合
@@ -30,8 +30,8 @@ public class Project {
     /**
      * 根据规则构造工程
      */
-    public Project(String ruleFile, String wordOutFile) throws IOException {
-        ParseRule rule = new ParseRule(ruleFile, wordOutFile, START);
+    public Project(String ruleFile) throws IOException {
+        ParseRule rule = new ParseRule(ruleFile, START);
         vns = rule.getVns();
         vts = rule.getVts();
         table = new PredictTable(rule);

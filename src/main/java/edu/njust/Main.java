@@ -25,7 +25,7 @@ public class Main {
         List<TokenInfo> infos = testWord();
 
         // 2. 进行语法分析
-        Project project = new Project(PARSE_GRAMMAR_FILE, WORD_OUT_FILE);
+        Project project = new Project(PARSE_GRAMMAR_FILE);
         project.getTable().writeToCSV("parse/table1.csv");
 
         ParserAnalyzer analyzer = new ParserAnalyzer(project, infos);

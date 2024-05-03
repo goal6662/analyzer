@@ -25,7 +25,7 @@ public class Matcher {
 
         String content;
         while ((content = reader.readLine()) != null) {
-            fileData.add(content.trim());
+            fileData.add(content);
         }
         reader.close();
     }
@@ -41,7 +41,7 @@ public class Matcher {
                 List<TokenInfo> tokenInfoList = matchLen(content + " ", dfaMap.get(type));
                 int curLen = len;
                 tokenInfoList.forEach((info) -> {
-                    info.setLen(curLen);
+                    info.setRow(curLen);
 
                     if (info.getType() == null) {
                         info.setType(type);
@@ -123,7 +123,7 @@ public class Matcher {
                 // 正常完结
                 if (isDelimiter(curStr) && curState.isAccept()) {
                     if (builder.length() > 0) {
-                        infos.add(new TokenInfo(builder.toString()));
+                        infos.add(new TokenInfo(i - builder.length(), builder.toString()));
                     }
                     builder = new StringBuilder();
                     curState = dfa.getStartState();

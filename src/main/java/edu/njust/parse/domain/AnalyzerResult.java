@@ -1,9 +1,17 @@
 package edu.njust.parse.domain;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class AnalyzerResult {
-    private boolean isSuccess;
+    private boolean isSuccess = true;
 
     private String message;
+
+    public AnalyzerResult(String message) {
+        this.message = message;
+        this.isSuccess = false;
+    }
 
     @Override
     public String toString() {

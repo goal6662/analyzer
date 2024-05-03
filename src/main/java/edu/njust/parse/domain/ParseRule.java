@@ -1,9 +1,7 @@
 package edu.njust.parse.domain;
 
 import edu.njust.common.Constant;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,8 +19,6 @@ public class ParseRule {
 
     private final List<Rule> rules = new ArrayList<>();
 
-    private final Map<String, Set<String>> types;
-
     private final String start;
 
     /**
@@ -37,9 +33,10 @@ public class ParseRule {
 
     /**
      * 解析文法规则
+     *
      * @param file 规则文件
      */
-    public ParseRule(String file, String outFile, String start) throws IOException {
+    public ParseRule(String file, String start) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(file);
 
         assert url != null;
@@ -54,38 +51,10 @@ public class ParseRule {
             rules.add(new Rule(rule));
             ruleList.add(rule);
         }
-        this.types = new HashMap<>();
         this.start = start;
 
         this.vns = generateVn();
         this.vts = generateVt();
-
-        // 移除 types 的无用符号
-        for (Vn vn : vns) {
-            types.remove(vn.getSymbol());
-        }
-    }
-
-    private Map<String, Set<String>> readTypeInfo(String outFile) throws IOException {
-        URL url = this.getClass().getClassLoader().getResource(outFile);
-
-        assert url != null;
-        BufferedReader reader = new BufferedReader(new FileReader(url.getFile()));
-
-        String rule;
-        Map<String, Set<String>> types = new HashMap<>();
-        boolean flag = false;
-        while ((rule = reader.readLine()) != null) {
-            if (rule.startsWith("----")) {
-                flag = true;
-            } else if (flag) {
-                String type = "<-" + rule.substring(0, rule.indexOf(':')) + "->";
-                String[] infos = rule.substring(rule.indexOf('[') + 1, rule.length() - 1).split(", ");
-                Set<String> set = new HashSet<>(Arrays.asList(infos));
-                types.put(type, set);
-            }
-        }
-        return types;
     }
 
     /**
@@ -93,7 +62,6 @@ public class ParseRule {
      */
     private Set<String> generateVt() {
         Set<String> vts = new HashSet<>();
-//        types.values().forEach(vts::addAll);
         for (Rule rule : rules) {
             List<String> rightList = rule.getRightList();
             rightList.forEach((item) -> {
@@ -107,6 +75,7 @@ public class ParseRule {
 
     /**
      * 生成 非终结符集合
+     *
      * @return
      */
     private Set<Vn> generateVn() {
@@ -119,7 +88,7 @@ public class ParseRule {
 
             // 获取已有值
             Vn vn = map.get(left);
-            vn.getFirst().addAll(generateNextFirst(rule, types.keySet()));
+            vn.getFirst().addAll(generateNextFirst(rule));
         }
 
         generateFirst(vns, map);
@@ -129,6 +98,7 @@ public class ParseRule {
 
     /**
      * 生成 终结符的 Follow 集
+     *
      * @param vns 终结符集合
      * @param map 终结符 symbol 的映射关系
      */
@@ -168,6 +138,7 @@ public class ParseRule {
         }
 
     }
+
     private void generateNextFollow(Rule rule, Map<String, Vn> map) {
         String left = rule.getLeft();
 
@@ -215,6 +186,7 @@ public class ParseRule {
 
     /**
      * 获取 First 集
+     *
      * @param vns
      * @param map
      */
@@ -225,41 +197,40 @@ public class ParseRule {
             hasChange = false;
             for (Vn vn : vns) {
                 // 获取终结符集合
-//                if (!types.containsKey(vn.getSymbol())) {
-                    int oldLen = vn.getFirst().size();
+                int oldLen = vn.getFirst().size();
 
-                    Set<String> need = new HashSet<>();
-                    for (String first : vn.getFirst()) {
-                        // 非终结符
-                        if (!Rule.isVt(first)) {
-                            need.addAll(map.get(first).getFirst());
-                        }
+                Set<String> need = new HashSet<>();
+                for (String first : vn.getFirst()) {
+                    // 非终结符
+                    if (!Rule.isVt(first)) {
+                        need.addAll(map.get(first).getFirst());
+                    }
 
-                    }
-                    // 判断大小是否有变化
-                    vn.getFirst().addAll(need);
-                    if (oldLen != vn.getFirst().size()) {
-                        hasChange = true;
-                    }
-//                }
+                }
+                // 判断大小是否有变化
+                vn.getFirst().addAll(need);
+                if (oldLen != vn.getFirst().size()) {
+                    hasChange = true;
+                }
             }
         } while (hasChange);
 
         // 移除占位符
         for (Vn vn : vns) {
-            for (String type: map.keySet()) {
+            for (String type : map.keySet()) {
                 vn.getFirst().remove(type);
             }
         }
     }
-    private Set<String> generateNextFirst(Rule rule, Set<String> types) {
+
+    private Set<String> generateNextFirst(Rule rule) {
         Set<String> set = new HashSet<>();
         List<String> rightList = rule.getRightList();
 
         for (String str : rightList) {
             set.add(str);
             // 第一个非终结符
-            if (Rule.isVt(str) || types.contains(str)) {
+            if (Rule.isVt(str)) {
                 break;
             }
         }
@@ -269,6 +240,7 @@ public class ParseRule {
 
     /**
      * 获取 非终结符 的集合
+     *
      * @return
      */
     private Map<String, Vn> getAllVn() {
@@ -279,97 +251,8 @@ public class ParseRule {
             String left = rule.getLeft();
             Vn vn = map.getOrDefault(left, new Vn(left));
             map.put(left, vn);
-
-//            for (String sign : rule.getRightList()) {
-//                if (!Rule.isVt(sign)) {
-//                    // 加入引用符号
-//                    if (types.containsKey(sign)) {
-//                        Vn temp = map.getOrDefault(sign, new Vn(sign));
-////                        temp.getFirst().addAll(types.get(sign));
-//                        map.put(sign, temp);
-//                    }
-//                }
-//            }
         }
-
         return map;
     }
-
 }
 
-
-@Getter
-@ToString
-class Rule {
-    private final String left;
-    private final String right;
-
-    /**
-     * 保留了<>
-     */
-    private final List<String> rightList;
-
-    public Rule(String rule) {
-        String[] split = rule.split(" -> ");
-
-        this.left = split[0];
-        this.right = split[1];
-        this.rightList = generateRightSet();
-    }
-
-    private List<String> generateRightSet() {
-        List<String> list = new ArrayList<>();
-
-        // 1. 获取第一个符号
-        for (int i = 0; i < right.length(); i++) {
-            if (right.charAt(i) == '<' && right.indexOf('>', i) != -1) {
-                // 截取并加入
-                int index = right.indexOf('>', i);
-                String symbol = right.substring(i, index + 1);
-                list.add(symbol);
-                i = index;
-            } else {
-                int index = right.indexOf('<', i + 1);
-                if (index == -1) {
-                    list.add(right.substring(i));
-                    return list;
-                } else {
-                    list.add(right.substring(i, index));
-                }
-                i = index - 1;
-            }
-        }
-
-        return list;
-    }
-
-    /**
-     * <str> -> str
-     * @param str
-     * @return 去除首尾字符
-     */
-    public static String removeSign(String str) {
-        return str.substring(1, str.length() - 1);
-    }
-
-    public String getOrigin() {
-        if (right.contains(",")) {
-            return "\"" + left + " -> " + right + "\"";
-        }
-        return left + " -> " + right;
-    }
-
-    /**
-     * 是否为终结符
-     * @param sign
-     * @return true: 是
-     */
-    public static boolean isVt(String sign) {
-        boolean con1 = sign.startsWith("<-") && sign.endsWith("->");
-        return !sign.startsWith("<") || !sign.endsWith(">") || con1;
-    }
-
-    public static boolean isVn(String sign) {
-        return !isVt(sign);
-    }
-}
