@@ -1,5 +1,6 @@
 package edu.njust.parse.domain;
 
+import edu.njust.common.Constant;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -75,11 +76,14 @@ public class Rule {
      * @return true: 是
      */
     public static boolean isVt(String sign) {
-        boolean con1 = sign.startsWith("<-") && sign.endsWith("->");
-        return !sign.startsWith("<") || !sign.endsWith(">") || con1;
+        return !sign.startsWith("<") || !sign.endsWith(">");
     }
 
     public static boolean isVn(String sign) {
         return !isVt(sign);
+    }
+
+    public static boolean isEmpty(Rule rule) {
+        return rule.getRightList().size() == 1 && rule.right.equals(Constant.EPSILON);
     }
 }

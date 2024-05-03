@@ -15,7 +15,7 @@ import java.util.*;
 @Getter
 public class ParseRule {
 
-    private final List<String> ruleList = new ArrayList<>();
+//    private final Map<String, Set<String>> tokenMap;
 
     private final List<Rule> rules = new ArrayList<>();
 
@@ -31,12 +31,15 @@ public class ParseRule {
      */
     private final Set<String> vts;
 
+    private final Set<String> vnToEmpty;
+
     /**
      * 解析文法规则
      *
-     * @param file 规则文件
+     * @param file     规则文件
+     * @param tokenMap
      */
-    public ParseRule(String file, String start) throws IOException {
+    public ParseRule(String file, String start, Map<String, Set<String>> tokenMap) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(file);
 
         assert url != null;
@@ -49,12 +52,32 @@ public class ParseRule {
                 continue;
             }
             rules.add(new Rule(rule));
-            ruleList.add(rule);
         }
-        this.start = start;
 
+        // 追加数据
+        for (String key : tokenMap.keySet()) {
+            for (String item : tokenMap.get(key)) {
+                rules.add(new Rule(key + " -> " + item));
+            }
+        }
+
+        this.start = start;
+//        this.tokenMap = tokenMap;
+        this.vnToEmpty = generateVnToEmpty();
         this.vns = generateVn();
         this.vts = generateVt();
+    }
+
+    private Set<String> generateVnToEmpty() {
+        Set<String> set = new HashSet<>();
+
+        for (Rule rule : rules) {
+            if (Rule.isEmpty(rule)) {
+                set.add(rule.getLeft());
+            }
+        }
+
+        return set;
     }
 
     /**
@@ -62,6 +85,7 @@ public class ParseRule {
      */
     private Set<String> generateVt() {
         Set<String> vts = new HashSet<>();
+//        tokenMap.values().forEach(vts::addAll);
         for (Rule rule : rules) {
             List<String> rightList = rule.getRightList();
             rightList.forEach((item) -> {
@@ -230,7 +254,7 @@ public class ParseRule {
         for (String str : rightList) {
             set.add(str);
             // 第一个非终结符
-            if (Rule.isVt(str)) {
+            if (Rule.isVt(str) || !vnToEmpty.contains(str)) {
                 break;
             }
         }
@@ -251,6 +275,16 @@ public class ParseRule {
             String left = rule.getLeft();
             Vn vn = map.getOrDefault(left, new Vn(left));
             map.put(left, vn);
+
+//            List<String> rightList = rule.getRightList();
+//            rightList.forEach((item) -> {
+//                if (tokenMap.containsKey(item) && !map.containsKey(item)) {
+//                    Vn temp = new Vn(item);
+//                    temp.getFirst().addAll(tokenMap.get(item));
+//                    map.put(item, temp);
+//                }
+//            });
+
         }
         return map;
     }

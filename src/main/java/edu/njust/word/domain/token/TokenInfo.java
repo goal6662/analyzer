@@ -24,7 +24,4 @@ public class TokenInfo {
         return "token: (行号: " + row + ", 列号: " + column + ", 类别: " + type  + ", 内容: " + content + ")";
     }
 
-    public String getMatchType() {
-        return "<-" + type + "->";
-    }
 }

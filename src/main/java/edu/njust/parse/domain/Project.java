@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -30,8 +31,8 @@ public class Project {
     /**
      * 根据规则构造工程
      */
-    public Project(String ruleFile) throws IOException {
-        ParseRule rule = new ParseRule(ruleFile, START);
+    public Project(String ruleFile, Map<String, Set<String>> tokenMap) throws IOException {
+        ParseRule rule = new ParseRule(ruleFile, START, tokenMap);
         vns = rule.getVns();
         vts = rule.getVts();
         table = new PredictTable(rule);

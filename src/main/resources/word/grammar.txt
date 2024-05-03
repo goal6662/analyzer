@@ -1,53 +1,132 @@
-# 数字
-<number> -> 0
-<number> -> 1
-<number> -> 2
-<number> -> 3
-<number> -> 4
-<number> -> 5
-<number> -> 6
-<number> -> 7
-<number> -> 8
-<number> -> 9
-# 小写字母
-<lower> -> a
-<lower> -> b
-<lower> -> c
-<lower> -> d
-<lower> -> e
-<lower> -> f
-<lower> -> g
-<lower> -> h
-<lower> -> i
-<lower> -> j
-<lower> -> k
-<lower> -> l
-<lower> -> m
-<lower> -> n
-<lower> -> o
-<lower> -> p
-<lower> -> q
-<lower> -> r
-<lower> -> s
-<lower> -> t
-<lower> -> u
-<lower> -> v
-<lower> -> w
-<lower> -> x
-<lower> -> y
-<lower> -> z
-# 大写字母
-<upper> -> A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
-<lower> -> a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z
-# 关键字 for,while,if,else,class,extend,public,static
-<key_word> ->
+# 关键字
+# 循环 for while
+# 判断 else if
+# 类、方法 class public return static void
+<key_word> -> e<A>
+<A> -> l<C>
+<C> -> s<D>
+<D> -> e
+<key_word> -> i<E>
+<E> -> f
+<key_word> -> v<F>
+<F> -> o<G>
+<G> -> i<H>
+<H> -> d
+<key_word> -> w<I>
+<I> -> h<J>
+<J> -> i<K>
+<K> -> l<L>
+<L> -> e
+
+# 数据类型
+<type> -> i<A>
+<A> -> n<B>
+<B> -> t
+<type> -> d<C>
+<C> -> o<D>
+<D> -> u<E>
+<E> -> b<F>
+<F> -> l<G>
+<G> -> e
+
+# 常量
+# 正负数
+<constant> -> -<A>
+<constant> -> +<A>
+<constant> -> <A>
+<A> -> \\d<A>
+<A> -> \\d
+# 小数
+<A> -> \\d<B>
+<A> -> .<C>
+<C> -> \\d<C>
+<C> -> \\d
+<C> -> \\d<D>
+# 科学计数法
+<A> -> \\d<D>
+<D> -> E<E>
+<D> -> e<E>
+<E> -> +<F>
+<E> -> -<F>
+<F> -> \\d<F>
+<F> -> \\d
+# 虚数
+<A> -> i
+<A> -> +<E>
+<A> -> -<E>
+<E> -> \\d<E>
+<E> -> i
+<E> -> \\d
+
 
 # 界符
-<delimiters> -> (
-<delimiters> -> )
-<delimiters> -> {
-<delimiters> -> }
-<delimiters> -> [
-<delimiters> -> ]
-<delimiters> -> ,
-<delimiters> -> ;
+<delimiter> -> (
+<delimiter> -> )
+<delimiter> -> {
+<delimiter> -> }
+<delimiter> -> [
+<delimiter> -> ]
+<delimiter> -> ,
+<delimiter> -> ;
+
+# 标识符
+<identifier> -> \\s<A>
+<identifier> -> \\S<A>
+<identifier> -> _<B>
+<identifier> -> \\s
+<identifier> -> \\S
+<A> -> \\s<A>
+<A> -> \\S<A>
+<A> -> \\d<A>
+<A> -> _<A>
+<A> -> _
+<A> -> \\s
+<A> -> \\S
+<A> -> \\d
+<B> -> \\s<C>
+<B> -> \\S<C>
+<B> -> \\d<C>
+<C> -> <A>
+
+# 错误标识符
+<error> -> \\d<A>
+<A> -> \\s<A>
+<A> -> \\S<A>
+<A> -> \\d<A>
+<A> -> _<A>
+<A> -> _
+<A> -> \\s
+<A> -> \\S
+<B> -> \\s<C>
+<B> -> \\S<C>
+<B> -> \\d<C>
+<C> -> <A>
+
+# 运算符
+<operator> -> +
+<operator> -> -
+<operator> -> *
+<operator> -> /
+<operator> -> %
+<operator> -> ^
+<operator> -> &
+<operator> -> |
+<operator> -> !
+<operator> -> >
+<operator> -> <
+<operator> -> =
+
+<operator> -> +<A>
+<A> -> +
+<operator> -> -<B>
+<B> -> -
+<operator> -> &<C>
+<C> -> &
+<operator> -> ><E>
+<E> -> =
+<operator> -> <<F>
+<F> -> =
+<operator> -> =<G>
+<G> -> =
+<operator> -> |<D>
+<D> -> |

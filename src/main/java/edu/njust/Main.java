@@ -2,7 +2,6 @@ package edu.njust;
 
 import edu.njust.parse.ParserAnalyzer;
 import edu.njust.parse.domain.AnalyzerResult;
-import edu.njust.parse.domain.ParseRule;
 import edu.njust.parse.domain.Project;
 import edu.njust.word.domain.dfa.DFA;
 import edu.njust.word.domain.grammar.Grammar;
@@ -11,12 +10,14 @@ import edu.njust.word.domain.token.TokenInfo;
 import edu.njust.word.util.DFAHandler;
 import edu.njust.word.util.Matcher;
 import edu.njust.word.util.NFAHandler;
-import org.omg.CORBA.TIMEOUT;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static edu.njust.config.BaseConfig.*;
 
 public class Main {
 
@@ -24,13 +25,22 @@ public class Main {
         // 1. 测试并获取Token序列
         List<TokenInfo> infos = testWord();
 
+        Map<String, Set<String>> tokenMap = Matcher.readTypeInfo(WORD_OUT_FILE);
         // 2. 进行语法分析
-        Project project = new Project(PARSE_GRAMMAR_FILE);
-        project.getTable().writeToCSV("parse/table1.csv");
+        Project project = new Project(PARSE_GRAMMAR_FILE, tokenMap);
+        project.getTable().writeToCSV(PREDICT_CSV_FILE);
 
         ParserAnalyzer analyzer = new ParserAnalyzer(project, infos);
 
+        // 3. 获取分析结果
         AnalyzerResult result = analyzer.analyzer();
+        // 4. 写入分析信息
+        if (result.isSuccess()) {
+            result.writeProcessToFile(PARSE_OUT_FILE);
+        } else {
+            result.writeProcessToFile(PARSE_OUT_FILE, "\"" + result + "\"");
+        }
+        // 5. 控制台打印分析结果
         System.out.println(result);
     }
 
@@ -55,25 +65,4 @@ public class Main {
 
         return infos;
     }
-
-    /**
-     * 需要分析的文件
-     */
-    public static final String FILE = "word/lex.txt";
-
-    /**
-     * 语法分析规则文件
-     */
-    public static final String PARSE_GRAMMAR_FILE = "parse/parse_grammar.txt";
-
-    /**
-     * 词法分析结果文件
-     */
-    public static final String WORD_OUT_FILE = "word/out10.txt";
-
-    /**
-     * 词法分析文法
-     */
-    public static final String WORD_GRAMMAR_FILE = "word/gra.txt";
-
 }

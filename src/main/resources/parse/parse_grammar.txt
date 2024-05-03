@@ -7,30 +7,26 @@
 <judge> -> !=
 # 表达式 暂不支持字符串
 <expression> -> (<expression>)
-<expression> -> <-constant-><constant@>
-<constant@> -> <-operator-><expression>
+<expression> -> <constant><constant@>
+<constant@> -> <operator><expression>
 <constant@> -> ε
-<expression> -> <-identifier-><-operator-><expression>
+<expression> -> <identifier><operator><expression>
 
 # 语句体
 <body> -> {<statements>}
 
 
 # 条件语句
-<condition> -> (<-constant-><judge><-constant->)
+<condition> -> (<constant><judge><constant>)
 
 <start> -> <statements>
 <start> -> <function>
 #
 # # 方法
 # # 声名
-# <function> -> <-type-><-identifier->(<param>)<body>
-# <param> -> <-type-><-identifier->,<param>
-# <param> -> <-type-><-identifier->
-# <param> -> ε
-<function> -> public<-type-><-identifier->(<param>)<body>
-<param> -> <-type-><type@>
-<type@> -> <-identifier-><identifier@>
+<function> -> public<type><identifier>(<param>)<body>
+<param> -> <type><type@>
+<type@> -> <identifier><identifier@>
 <identifier@> -> ,<param>
 <identifier@> -> ε
 <param> -> ε
@@ -41,13 +37,13 @@
 <statements> -> ε
 
 # 声名语句
-# <statement> -> <-type-><-identifier->;
+# <statement> -> <type><identifier>;
 # 声名兼赋值
-<statement> -> <-type-><-identifier->=<expression>;
+<statement> -> <type><identifier>=<expression>;
 
 # 赋值语句
 <statement> -> <assign>
-<assign> -> <-identifier-><identifier@><expression>;
+<assign> -> <identifier><identifier@><expression>;
 # 正常赋值
 <identifier@> -> =
 # 语法糖
@@ -69,7 +65,7 @@
 # 结束符
 <end> -> ;
 # 返回
-<statement> -> return<-constant-><end>
+<statement> -> return<constant><end>
 # <statement> -> return<end>
 # 跳过
 <statement> -> continue<end>

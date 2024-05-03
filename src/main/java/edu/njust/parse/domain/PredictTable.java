@@ -57,29 +57,26 @@ public class PredictTable {
 
             Set<String> first = getFirst(rule);
             for (String vt : first) {
-                int columnIndex = columnMap.get(vt);
-
-                if (len[columnIndex] != null) {
-                    System.out.println("pre: " + len[columnIndex] + " \nafter: " + rule.getOrigin());
-                    throw new RuntimeException("error: [" + rowIndex + ", " + columnIndex + "]");
-                }
-                len[columnIndex] = rule.getOrigin();
-
-            }
-
-            //TODO 可以推出空串
-            Vn left = vnMap.get(rule.getLeft());
-            if (left.getFirst().contains(Constant.EPSILON)) {
-                for (String next : left.getFollow()) {
-                    int columnIndex = columnMap.get(next);
-//                    if (len[columnIndex] != null) {
-//                        System.out.println("pre: " + len[columnIndex] + " \nafter: " + rule.getOrigin());
-//                        throw new RuntimeException("error: [" + rowIndex + ", " + columnIndex + "]");
-//                    }
-                    len[columnIndex] = rule.getLeft() + " -> " + Constant.EPSILON;
+                if (vt.equals(Constant.EPSILON)) {
+                    Vn left = vnMap.get(rule.getLeft());
+                    if (left.getFirst().contains(Constant.EPSILON)) {
+                        for (String next : left.getFollow()) {
+                            int columnIndex = columnMap.get(next);
+                            len[columnIndex] = rule.getLeft() + " -> " + Constant.EPSILON;
+                        }
+                    }
+                } else {
+                    int columnIndex = columnMap.get(vt);
+                    if (len[columnIndex] != null) {
+                        System.out.println("pre: " + len[columnIndex] + " \nafter: " + rule.getOrigin());
+                        throw new RuntimeException("error: [" + rowIndex + ", " + columnIndex + "]");
+                    }
+                    len[columnIndex] = rule.getOrigin();
                 }
             }
         }
+
+
     }
 
     /**

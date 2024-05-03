@@ -153,6 +153,30 @@ public class Matcher {
         return set.contains(s);
     }
 
+
+    public static Map<String, Set<String>> readTypeInfo(String outFile) throws IOException {
+        URL url = Matcher.class.getClassLoader().getResource(outFile);
+
+        assert url != null;
+        BufferedReader reader = new BufferedReader(new FileReader(url.getFile()));
+
+        String rule;
+        Map<String, Set<String>> types = new HashMap<>();
+        boolean flag = false;
+        while ((rule = reader.readLine()) != null) {
+            if (rule.startsWith("----")) {
+                flag = true;
+            } else if (flag) {
+                String type = "<" + rule.substring(0, rule.indexOf(':')) + ">";
+                String[] infos = rule.substring(rule.indexOf('[') + 1, rule.length() - 1).split(", ");
+                Set<String> set = new HashSet<>(Arrays.asList(infos));
+                types.put(type, set);
+            }
+        }
+        return types;
+    }
+
+
     public void writeToFile(String outputFile, List<TokenInfo> infos) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(outputFile);
 
