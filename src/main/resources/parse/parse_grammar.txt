@@ -19,27 +19,32 @@
 # 条件语句
 <condition> -> (<constant><judge><constant>)
 
-<start> -> <statements>
-<start> -> <function>
-#
-# # 方法
-# # 声名
-<function> -> public<type><identifier>(<param>)<body>
+<start> -> <project>
+<project> -> <statements>
+<project> -> <modifier><function>
+
+
+# 方法
+# 声名
+<function> -> <pair>(<param>)<body>
 <param> -> <type><type@>
 <type@> -> <identifier><identifier@>
 <identifier@> -> ,<param>
 <identifier@> -> ε
 <param> -> ε
 
+# 常见的声名语句
+<pair> -> <type><identifier>
 
 # 语句
 <statements> -> <statement><statements>
 <statements> -> ε
 
 # 声名语句
-# <statement> -> <type><identifier>;
+<statement> -> <pair><pair_state>;
 # 声名兼赋值
-<statement> -> <type><identifier>=<expression>;
+<pair_state> -> =<expression>
+<pair_state> -> ε
 
 # 赋值语句
 <statement> -> <assign>

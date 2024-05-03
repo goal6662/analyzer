@@ -21,7 +21,7 @@ public class BaseConfig {
     /**
      * 词法分析文法
      */
-    public static final String WORD_GRAMMAR_FILE = "word/gra.txt";
+    public static final String WORD_GRAMMAR_FILE = "word/grammar.txt";
 
     public static final String PREDICT_CSV_FILE = "parse/table.csv";
 

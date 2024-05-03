@@ -33,5 +33,6 @@ public class TokenType {
      */
     public static final String TYPE = "type";
     public static final String ERROR = "error";
+    public static final String MODIFIER = "modifier";
 
 }

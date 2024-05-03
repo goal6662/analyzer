@@ -130,3 +130,17 @@
 <G> -> =
 <operator> -> |<D>
 <D> -> |
+
+# 修饰符
+<modifier> -> p<A>
+<A> -> u<B>
+<B> -> b<C>
+<C> -> l<D>
+<D> -> i<E>
+<E> -> c
+<A> -> r<F>
+<F> -> i<G>
+<G> -> v<H>
+<H> -> a<I>
+<I> -> t<J>
+<J> -> e

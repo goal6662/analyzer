@@ -25,7 +25,11 @@ public class Matcher {
 
         String content;
         while ((content = reader.readLine()) != null) {
-            fileData.add(content);
+            if (content.trim().startsWith("#")) {
+                fileData.add("");
+            } else {
+                fileData.add(content);
+            }
         }
         reader.close();
     }
@@ -60,6 +64,7 @@ public class Matcher {
         Set<String> kt = new HashSet<>();
         infoMap.get(TokenType.TYPE).forEach((info) -> kt.add(info.getContent()));
         infoMap.get(TokenType.KEY_WORD).forEach((info) -> kt.add(info.getContent()));
+        infoMap.get(TokenType.MODIFIER).forEach((info) -> kt.add(info.getContent()));
 
         List<TokenInfo> list = new ArrayList<>();
         for (TokenInfo info : infos) {
