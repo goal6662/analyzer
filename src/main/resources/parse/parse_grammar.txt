@@ -1,0 +1,70 @@
+# 判断条件
+<judge> -> <
+<judge> -> >
+<judge> -> ==
+<judge> -> <=
+<judge> -> >=
+<judge> -> !=
+# 表达式 暂不支持字符串
+<expression> -> (<expression>)
+<expression> -> <constant><constant@>
+<constant@> -> <operator><expression>
+<constant@> -> ε
+<expression> -> <identifier><operator><expression>
+
+
+# 条件语句
+<condition> -> <constant><judge><constant>
+
+<start> -> <statements>
+<start> -> <function>
+#
+# # 方法
+# # 声名
+# <function> -> <type><identifier>(<param>){<statements>}
+# <param> -> <type><identifier>,<param>
+# <param> -> <type><identifier>
+# <param> -> ε
+<function> -> fun<type><identifier>(<param>){<statements>}
+<param> -> <type><type@>
+<type@> -> <identifier><identifier@>
+<identifier@> -> ,<param>
+<identifier@> -> ε
+<param> -> ε
+
+
+# 语句
+<statements> -> <statement><statements>
+<statements> -> ε
+
+# 声名语句
+<statement> -> <type><identifier>;
+
+# 赋值语句
+<statement> -> <assign>
+<assign> -> <identifier><identifier@><expression>;
+# 正常赋值
+<identifier@> -> =
+# 语法糖
+<identifier@> -> +=
+<identifier@> -> -=
+<identifier@> -> *=
+<identifier@> -> /=
+<identifier@> -> %=
+<identifier@> -> &=
+<identifier@> -> |=
+<identifier@> -> ^=
+
+# 条件判断
+<statement> -> if(<condition>){<statements>}
+
+# 循环
+<statement> -> while(<condition>){<statements>}
+
+# 返回
+<statement> -> return<constant>;
+<statement> -> return;
+# 跳过
+<statement> -> continue;
+# 结束
+<statement> -> break;
