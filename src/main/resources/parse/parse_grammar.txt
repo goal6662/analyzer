@@ -12,6 +12,9 @@
 <constant@> -> ε
 <expression> -> <identifier><operator><expression>
 
+# 语句体
+<body> -> {<statements>}
+
 
 # 条件语句
 <condition> -> <constant><judge><constant>
@@ -21,11 +24,11 @@
 #
 # # 方法
 # # 声名
-# <function> -> <type><identifier>(<param>){<statements>}
+# <function> -> <type><identifier>(<param>)<body>
 # <param> -> <type><identifier>,<param>
 # <param> -> <type><identifier>
 # <param> -> ε
-<function> -> fun<type><identifier>(<param>){<statements>}
+<function> -> fun<type><identifier>(<param>)<body>
 <param> -> <type><type@>
 <type@> -> <identifier><identifier@>
 <identifier@> -> ,<param>
@@ -56,15 +59,17 @@
 <identifier@> -> ^=
 
 # 条件判断
-<statement> -> if(<condition>){<statements>}
+<statement> -> if(<condition>)<body>
 
 # 循环
-<statement> -> while(<condition>){<statements>}
+<statement> -> while(<condition>)<body>
 
+# 结束符
+<end> -> ;
 # 返回
-<statement> -> return<constant>;
-<statement> -> return;
+<statement> -> return<constant><end>
+# <statement> -> return<end>
 # 跳过
-<statement> -> continue;
+<statement> -> continue<end>
 # 结束
-<statement> -> break;
+<statement> -> break<end>
