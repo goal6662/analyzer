@@ -1,6 +1,7 @@
 package edu.njust.parse.domain;
 
 import edu.njust.common.Constant;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -78,7 +79,7 @@ public class ParseRule {
             if (rule.startsWith("----")) {
                 flag = true;
             } else if (flag) {
-                String type = "<" + rule.substring(0, rule.indexOf(':')) + ">";
+                String type = "<-" + rule.substring(0, rule.indexOf(':')) + "->";
                 String[] infos = rule.substring(rule.indexOf('[') + 1, rule.length() - 1).split(", ");
                 Set<String> set = new HashSet<>(Arrays.asList(infos));
                 types.put(type, set);
@@ -92,7 +93,7 @@ public class ParseRule {
      */
     private Set<String> generateVt() {
         Set<String> vts = new HashSet<>();
-        types.values().forEach(vts::addAll);
+//        types.values().forEach(vts::addAll);
         for (Rule rule : rules) {
             List<String> rightList = rule.getRightList();
             rightList.forEach((item) -> {
@@ -224,7 +225,7 @@ public class ParseRule {
             hasChange = false;
             for (Vn vn : vns) {
                 // 获取终结符集合
-                if (!types.containsKey(vn.getSymbol())) {
+//                if (!types.containsKey(vn.getSymbol())) {
                     int oldLen = vn.getFirst().size();
 
                     Set<String> need = new HashSet<>();
@@ -240,7 +241,7 @@ public class ParseRule {
                     if (oldLen != vn.getFirst().size()) {
                         hasChange = true;
                     }
-                }
+//                }
             }
         } while (hasChange);
 
@@ -279,16 +280,16 @@ public class ParseRule {
             Vn vn = map.getOrDefault(left, new Vn(left));
             map.put(left, vn);
 
-            for (String sign : rule.getRightList()) {
-                if (!Rule.isVt(sign)) {
-                    // 加入引用符号
-                    if (types.containsKey(sign)) {
-                        Vn temp = map.getOrDefault(sign, new Vn(sign));
-                        temp.getFirst().addAll(types.get(sign));
-                        map.put(sign, temp);
-                    }
-                }
-            }
+//            for (String sign : rule.getRightList()) {
+//                if (!Rule.isVt(sign)) {
+//                    // 加入引用符号
+//                    if (types.containsKey(sign)) {
+//                        Vn temp = map.getOrDefault(sign, new Vn(sign));
+////                        temp.getFirst().addAll(types.get(sign));
+//                        map.put(sign, temp);
+//                    }
+//                }
+//            }
         }
 
         return map;
@@ -352,6 +353,9 @@ class Rule {
     }
 
     public String getOrigin() {
+        if (right.contains(",")) {
+            return "\"" + left + " -> " + right + "\"";
+        }
         return left + " -> " + right;
     }
 
@@ -361,7 +365,8 @@ class Rule {
      * @return true: 是
      */
     public static boolean isVt(String sign) {
-        return !sign.startsWith("<") || !sign.endsWith(">");
+        boolean con1 = sign.startsWith("<-") && sign.endsWith("->");
+        return !sign.startsWith("<") || !sign.endsWith(">") || con1;
     }
 
     public static boolean isVn(String sign) {

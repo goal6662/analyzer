@@ -84,7 +84,7 @@ public class PredictTable {
         Set<String> set = new HashSet<>();
 
         for (String sign : rule.getRightList()) {
-            if (sign.startsWith("<") && sign.endsWith(">")) {
+            if (Rule.isVn(sign)) {
                 Set<String> first = vnMap.get(sign).getFirst();
                 set.addAll(first);
                 // 不能推出空
@@ -112,7 +112,7 @@ public class PredictTable {
         StringBuilder len = new StringBuilder();
         for (String column : columnMap.keySet()) {
             if (",".equals(column)) {
-                column = "，";
+                column = "\",\"";
             }
             len.append(",").append(column);
         }
