@@ -68,7 +68,15 @@ public class Matcher {
             }
             list.add(info);
         }
+        this.sortInfo(list);
         return list;
+    }
+
+    private void sortInfo(List<TokenInfo> infos) {
+        // 先按照行号升序排序
+        // 行号相等时，按照升序列号排序
+        Comparator<TokenInfo> comparator = Comparator.comparingInt(TokenInfo::getRow).thenComparingInt(TokenInfo::getColumn);
+        infos.sort(comparator);
     }
 
     private List<TokenInfo> matchLen(String content, DFA dfa) {
@@ -90,6 +98,7 @@ public class Matcher {
                 // 跳过界符
                 if (isDelimiter(curStr)) {
                     ++i;
+                    continue;
                 }
 
                 while (!isDelimiter(curStr)) {
