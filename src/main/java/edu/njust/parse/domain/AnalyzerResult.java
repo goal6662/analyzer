@@ -39,8 +39,8 @@ public class AnalyzerResult {
     public void writeProcessToFile(String filePath) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(filePath);
 
-        assert url != null;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getFile()));
+        String path = url != null ? url.getPath() : filePath;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
         writer.write("步骤, 符号栈, 当前输入, 符号串, 所用规则");
         writer.newLine();
@@ -57,8 +57,8 @@ public class AnalyzerResult {
     public void writeProcessToFile(String filePath, String errorInfo) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(filePath);
 
-        assert url != null;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getFile()));
+        String path = url != null ? url.getPath() : filePath;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
         writer.write("步骤, 符号栈, 当前输入, 符号串, 所用规则");
         writer.newLine();

@@ -19,8 +19,8 @@ public class Matcher {
     public Matcher(String filePath) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(filePath);
 
-        assert url != null;
-        BufferedReader reader = new BufferedReader(new FileReader(url.getFile()));
+        String path = url != null ? url.getPath() : filePath;
+        BufferedReader reader = new BufferedReader(new FileReader(path));
         fileData = new ArrayList<>();
 
         String content;
@@ -204,11 +204,10 @@ public class Matcher {
 
     public void writeToFile(String outputFile, List<TokenInfo> infos) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(outputFile);
+        String path = url != null ? url.getPath() : outputFile;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
         Map<String, Set<String>> map = new HashMap<>();
-        assert url != null;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath()));
-
         for (TokenInfo info : infos) {
             writer.write(info.getInfo());
             writer.newLine();
@@ -238,8 +237,8 @@ public class Matcher {
     public void writeToFile(String outputFile, Map<String, List<TokenInfo>> infos) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(outputFile);
 
-        assert url != null;
-        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath()));
+        String path = url != null ? url.getPath() : outputFile;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
         for (String type : infos.keySet()) {
             infos.get(type).forEach(info -> {

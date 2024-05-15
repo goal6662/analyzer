@@ -158,10 +158,9 @@ public class PredictTable {
         List<String> infos = generateCSVInfo();
 
         URL url = this.getClass().getClassLoader().getResource(filePath);
-        assert url != null;
 
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(url.getPath()));
+        String path = url != null ? url.getPath() : filePath;
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
         for (String info : infos) {
             writer.write(info);

@@ -3,9 +3,7 @@ package edu.njust.word.domain.grammar;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -111,9 +109,9 @@ public class Grammar {
 
     private BufferedReader loadFile(String filePath) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(filePath);
-        assert url != null;
+        String path = url != null ? url.getPath() : filePath;
 
-        return new BufferedReader(new FileReader(url.getFile()));
+        return new BufferedReader(new FileReader(path));
     }
 }
 

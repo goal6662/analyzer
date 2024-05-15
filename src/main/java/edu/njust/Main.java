@@ -1,5 +1,6 @@
 package edu.njust;
 
+import edu.njust.common.TokenType;
 import edu.njust.parse.ParserAnalyzer;
 import edu.njust.parse.domain.AnalyzerResult;
 import edu.njust.parse.domain.Project;
@@ -54,6 +55,13 @@ public class Main {
         for (String key : nfa.keySet()) {
             NFA nfaT = nfa.get(key);
             DFA dfaT = DFAHandler.nfaToNFA(nfaT);
+
+            if (key.equals(TokenType.KEY_WORD)) {
+                // 按需打印信息
+                NFAHandler.printNFA(nfaT);
+                DFAHandler.printDFA(dfaT);
+            }
+
             dfa.put(key, dfaT);
         }
         // 3. 获取Token序列

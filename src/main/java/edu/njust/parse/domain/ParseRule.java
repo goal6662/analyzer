@@ -3,9 +3,7 @@ package edu.njust.parse.domain;
 import edu.njust.common.Constant;
 import lombok.Getter;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -42,8 +40,8 @@ public class ParseRule {
     public ParseRule(String file, String start, Map<String, Set<String>> tokenMap) throws IOException {
         URL url = this.getClass().getClassLoader().getResource(file);
 
-        assert url != null;
-        BufferedReader reader = new BufferedReader(new FileReader(url.getFile()));
+        String path = url != null ? url.getPath() : file;
+        BufferedReader reader = new BufferedReader(new FileReader(path));
 
         String rule;
         while ((rule = reader.readLine()) != null) {
