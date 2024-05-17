@@ -1,2 +1,18 @@
-int boc = 5E6;
-6ba
+private int main(double c, int a) {
+    # 这是一行注释
+    _temp_bnt = 0.34E+1;
+    int a = 9 + _temp_bnt - 76;cd = 165;
+
+    double b;
+    int a = 3;
+    while(a > 0) {
+        a -= 1;
+    }
+    double _boc3 = -3.4e5;
+    a = 1+10i;
+    if (b == 1) {
+        b = -153.2;
+    } else {
+        b += 15;
+    }
+}
